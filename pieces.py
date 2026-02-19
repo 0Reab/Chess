@@ -1,14 +1,18 @@
 class Piece:
-    def __init__(self, row, col):
+    def __init__(self, col, row, captured=False):
         self.row = row
         self.col = col 
         self.range = 8
-        self.piece_data = self.__square_to_piece(row,col)
+        self.exists = True
+        self.piece_data = self.__square_to_piece(row,col, captured)
 
         if self.piece_data:
             self.kind, self.color = self.piece_data
         else:
             self.kind, self.color = None, None
+
+    def existing(self):
+        return self.exists
 
     def get_data(self): # simple fetch data
         return [self.kind, self.color]
@@ -29,12 +33,17 @@ class Piece:
         return self.range
 
     def show(self): # just for display
-        return self.kind[0] if self.kind else None
+        return self.kind[0]
     
-    def __square_to_piece(self, row, col):
+    def __square_to_piece(self, row, col, captured):
         # implement pawn promotion handling when initializing a piece
+        if captured:
+            self.exists = False 
+            return [None, None]
+
         if row not in [1,2,7,8]:
-            return None
+            self.exists = False
+            return [None, None]
         
         color, kind = '', ''
 

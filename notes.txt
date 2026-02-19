@@ -1,0 +1,6 @@
+current issue is having squares initialize as none causes every square.method to throw an error, fair enough
+so what do I do 
+
+have square still initialize as their objects, and have square.method available -> but method for checking if square is populated needs to be fixed
+
+into something like -> return True if self.piece. else False

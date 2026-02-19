@@ -1,3 +1,6 @@
+from pieces import Piece
+
+
 class Square:
     def __init__(self, letter, number, piece):
         self.letter = letter 
@@ -5,7 +8,7 @@ class Square:
         self.piece = piece
 
     def get_piece(self):
-        return self.piece
+        return self.piece if self.piece.exists else None
 
     def get_pos(self):
         return [self.letter, self.number]
@@ -20,7 +23,7 @@ class Square:
         self.piece = piece
     
     def clear(self):
-        self.piece = None
+        self.piece = Piece(self.letter, self.number, captured=True)
 
     def is_ocupied(self):
-        return True if self.piece else False
+        return self.piece.existing()

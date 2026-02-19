@@ -14,12 +14,11 @@ class Board:
         for row in self.board[::-1]:
         # invert board for white perspective only for visualizing
             for square in row:
-                piece = square.get_piece().show()
-
-                if piece == None:
-                    result += '[ ]'
-                else:
+                if square.is_ocupied():
+                    piece = square.get_piece().show()
                     result += f'[{piece}]'
+                else:
+                    result += '[ ]'
             
             result += '\n'
         return result
@@ -30,7 +29,7 @@ class Board:
 
         for num in range(1, 9):
             for let in self.letters:
-                square.append(Square(let, num, Piece(num, let)))
+                square.append(Square(let, num, Piece(let, num)))
 
             rows.append(square)
             square = []
@@ -65,8 +64,9 @@ class Board:
     def get_diags(self, square):
         return NotImplemented
 
-    def get_square(self, col, row):
+    def get_square(self, position):
         # row is number, col is letter E4
+        col, row = position
         row -= 1 # adjust for 0 indexed array;
         col_idx = 0
 
@@ -110,7 +110,7 @@ class Board:
 
         #return piece_range
 
-
+'''
 board = Board()
 
 square = board.get_square('E', 2)
@@ -122,7 +122,7 @@ board_idx = board.get_array_idx(square)
 
 piece_range = board.get_moves(square)
 
-print(piece_range)
+print(piece_range)'''
 #print(board)
 #print(sqr)
 #print(pic)
