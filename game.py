@@ -23,12 +23,12 @@ class Game:
             all_piece_moves = board.get_moves(start_square)
 
             # get pieces from start and destination squares
-            moving_piece = start_square.get_piece()
-            target_piece = desti_square.get_piece()
+            moving_piece = start_square.piece
+            target_piece = desti_square.piece
 
             path = self.get_path(moving_piece, start_square, desti_square)
 
-            if moving_piece.get_kind() == 'pawn':
+            if moving_piece.kind == 'pawn':
                 if not self.is_pawn_moving_forward(start_square, desti_square):
                     msg(error, 'pawns only go forward')
                     continue
@@ -37,7 +37,7 @@ class Game:
                 msg(error, 'you cannot move to start square')
                 continue
 
-            if moving_piece.get_color() != self.player_color:
+            if moving_piece.color != self.player_color:
                 msg(error, 'you cant move your opponents pieces')
                 continue
 
@@ -54,15 +54,15 @@ class Game:
                     msg(error, 'same color piece on target square')
                     continue
                 else:
-                    print(f'valid move capturing {target_piece.get_kind()} on {desti_square.get_pos()}')
+                    print(f'valid move capturing {target_piece.kind} on {desti_square.get_pos()}')
 
             self.move(moving_piece, start_square, desti_square)
 
             print(f'valid move to {desti_square.get_pos()}')
 
     def is_pawn_moving_forward(self, start, desti):
-        row_1 = start.get_number()
-        row_2 = desti.get_number()
+        row_1 = start.number
+        row_2 = desti.number
 
         if self.player_color == 'W':
             return row_1 < row_2
@@ -85,11 +85,11 @@ class Game:
     
     def is_move_in_range(self, piece, path):
         #print(f'total distance {len(path) + 1} of {piece.get_kind()} of range {piece.get_range()}')
-        return piece.get_range() >= len(path) + 1 # path doesn't include end square
+        return piece.range >= len(path) + 1 # path doesn't include end square
         
     def get_path(self, moving_piece, start, destination):
         # returns all squares in between start square and destination square
-        if moving_piece.get_kind() == 'knight':
+        if moving_piece.kind == 'knight':
             return []
 
         path = None
@@ -131,7 +131,7 @@ class Game:
             self.player_color = 'W'
 
     def is_same_color(self, piece_1, piece_2):
-        return piece_1.get_color() == piece_2.get_color()
+        return piece_1.color == piece_2.color
 
     def prompt_player(self):
         selected = input(f'player {self.player_color} select square: ') # eg. 'E2'

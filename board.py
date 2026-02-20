@@ -15,7 +15,7 @@ class Board:
         # invert board for white perspective only for visualizing
             for square in row:
                 if square.is_ocupied():
-                    piece = square.get_piece().show()
+                    piece = square.piece.show()
                     result += f'[{piece}]'
                 else:
                     result += '[ ]'
@@ -79,61 +79,21 @@ class Board:
 
     def get_moves(self, square):
         moves = []
-        piece = square.get_piece()
+        piece = square.piece
 
         piece_pos = self.get_array_idx(square)
         horizontal_file = self.get_horizontal_file(square)
         vertical_file = self.get_vertical_file(square)
 
-        #diags = self.get_diags(square)
-
-        piece_kind = piece.get_kind()
-        piece_color = piece.get_color()
-        piece_range = piece.get_range()
-
-        #print(f'{piece_pos[0]} {piece_range}')
-
         x = piece_pos[0]
         y = piece_pos[1]
 
-        if piece_color == 'w':
-            x -= piece_range
+        if piece.color == 'w':
+            x -= piece.range
         else:
-            x += piece_range
+            x += piece.range
 
         new_pos = [x, y]
 
         moves.append(new_pos)
         return moves
-
-        #print(f'range={piece_range} pos={piece_pos} ; new={new_pos} ; {piece_kind},{piece_color}')
-
-        #return piece_range
-
-'''
-board = Board()
-
-square = board.get_square('E', 2)
-row_data = board.display_row_data(1)
-pic = square.get_piece()
-
-data = pic.get_data()
-board_idx = board.get_array_idx(square)
-
-piece_range = board.get_moves(square)
-
-print(piece_range)'''
-#print(board)
-#print(sqr)
-#print(pic)
-#print(data)
-#print(board_idx)
-#print(row_data)
-
-#print(files)
-
-'''
-for file in files:
-    for square in file:
-        print(square.get_piece().get_data()[0])
-'''

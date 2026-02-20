@@ -18,26 +18,8 @@ class Piece:
         match self.kind:
             case 'pawn' | 'king': self.range = 1
 
-    def existing(self):
-        return self.exists
-
     def get_data(self): # simple fetch data
         return [self.kind, self.color]
-
-    def get_kind(self):
-        return self.kind
-
-    def get_color(self):
-        return self.color
-
-    def get_row(self):
-        return self.row
-
-    def get_col(self):
-        return self.col
-
-    def get_range(self):
-        return self.range
 
     def show(self): # just for display
         return self.kind[0]

@@ -13,12 +13,6 @@ class Square:
     def get_pos(self):
         return [self.letter, self.number]
 
-    def get_letter(self):
-        return self.letter
-
-    def get_number(self):
-        return self.number
-
     def set_piece(self, piece):
         self.piece = piece
     
@@ -26,4 +20,4 @@ class Square:
         self.piece = Piece(self.letter, self.number, captured=True)
 
     def is_ocupied(self):
-        return self.piece.existing()
+        return self.piece.exists
