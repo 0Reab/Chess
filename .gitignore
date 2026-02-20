@@ -2,3 +2,4 @@
 *.psd
 tmp.py
 /server/*.txt
+/server/__pycache__

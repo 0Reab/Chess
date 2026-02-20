@@ -9,6 +9,8 @@ Home page
 
 {% if nickname %} <p>Hello {{ nickname }}!</p> {% endif %}
 
+{% if msg %} <p>Server: {{ msg }}</p> {% endif %}
+
 <form action="/set-nickname" method="post">
     <div>
         <label for="name">Nickname:</label>

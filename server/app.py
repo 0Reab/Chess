@@ -1,13 +1,14 @@
 from flask import Flask, render_template, request, make_response
 import random
 import os
+from backend import *
 
 
 app = Flask(__name__, template_folder='pages')
 
 def read_key():
     """ read flask key from file """
-    with open('./server/key.txt', 'r') as f:
+    with open('./key.txt', 'r') as f:
         key = f.read()
     return key
 
@@ -35,12 +36,15 @@ def set_nickname():
 def join_game():
     if request.method == 'POST':
         code = request.form.get('code')
-
-        # do code check
-
         nickname = request.cookies.get('nickname')
+        msg = 'something went wong :p'
 
-        return render_template('home.html', nickname=nickname)
+        if is_code_valid(code):
+            resp = render_template('game.html', nickname=nickname) # add opponent nick too
+        else:
+            resp = render_template('home.html', nickname=nickname, msg=msg)
+
+        return resp
 
 
 @app.route('/generate-game-code', methods=['GET'])
