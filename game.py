@@ -28,6 +28,15 @@ class Game:
 
             path = self.get_path(moving_piece, start_square, desti_square)
 
+            if moving_piece.get_kind() == 'pawn':
+                if not self.is_pawn_moving_forward(start_square, desti_square):
+                    msg(error, 'pawns only go forward')
+                    continue
+
+            if start_square == desti_square:
+                msg(error, 'you cannot move to start square')
+                continue
+
             if moving_piece.get_color() != self.player_color:
                 msg(error, 'you cant move your opponents pieces')
                 continue
@@ -44,12 +53,21 @@ class Game:
                 if self.is_same_color(moving_piece, target_piece):
                     msg(error, 'same color piece on target square')
                     continue
-
-                print(f'valid move capturing {target_piece.get_kind()} on {desti_square.get_pos()}')
+                else:
+                    print(f'valid move capturing {target_piece.get_kind()} on {desti_square.get_pos()}')
 
             self.move(moving_piece, start_square, desti_square)
 
             print(f'valid move to {desti_square.get_pos()}')
+
+    def is_pawn_moving_forward(self, start, desti):
+        row_1 = start.get_number()
+        row_2 = desti.get_number()
+
+        if self.player_color == 'W':
+            return row_1 < row_2
+        else:
+            return row_1 > row_2
 
     def path_obstructed(self, path):
         for square in path:
