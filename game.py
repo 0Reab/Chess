@@ -7,12 +7,12 @@ class Game:
         self.running = True
         self.players = ['W', 'B'] # aka ['white', 'black']
         self.player_color = self.players[0]
+        self.message = lambda error, description: self.msg(error, description)
+        self.error = True
 
     def play(self):
         while self.running:
             board = self.board
-            msg = lambda error, description: self.msg(error, description)
-            error = True
             print(board)
 
             # get players move attempt
@@ -26,39 +26,41 @@ class Game:
             moving_piece = start_square.piece
             target_piece = desti_square.piece
 
-            path = self.get_path(moving_piece, start_square, desti_square)
-
-            if moving_piece.kind == 'pawn':
-                if not self.is_pawn_moving_forward(start_square, desti_square):
-                    msg(error, 'pawns only go forward')
-                    continue
-
-            if start_square == desti_square:
-                msg(error, 'you cannot move to start square')
+            if not self.move_is_legal(moving_piece, target_piece, start_square, desti_square):
                 continue
-
-            if moving_piece.color != self.player_color:
-                msg(error, 'you cant move your opponents pieces')
-                continue
-
-            if not self.is_move_in_range(moving_piece, path):
-                msg(error, 'exceeded piece range')
-                continue
-
-            if self.path_obstructed(path):
-                msg(error, 'you cant move thru pieces')
-                continue
-
-            if desti_square.is_ocupied():
-                if self.is_same_color(moving_piece, target_piece):
-                    msg(error, 'same color piece on target square')
-                    continue
-                else:
-                    print(f'valid move capturing {target_piece.kind} on {desti_square.get_pos()}')
 
             self.move(moving_piece, start_square, desti_square)
 
-            print(f'valid move to {desti_square.get_pos()}')
+            print()
+
+    def move_is_legal(self, moving_piece, target_piece, start_square, desti_square):
+        msg = self.message
+        error = self.error
+        path = self.get_path(moving_piece, start_square, desti_square)
+
+        if moving_piece.kind == 'pawn':
+            if not self.is_pawn_moving_forward(start_square, desti_square):
+                return msg(error, 'pawns only go forward')
+
+        if start_square == desti_square:
+            return msg(error, 'you cannot move to start square')
+
+        if moving_piece.color != self.player_color:
+            return msg(error, 'you cant move your opponents pieces')
+
+        if not self.is_move_in_range(moving_piece, path):
+            return msg(error, 'exceeded piece range')
+
+        if self.path_obstructed(path):
+            return msg(error, 'you cant move thru pieces')
+
+        if desti_square.is_ocupied():
+            if self.is_same_color(moving_piece, target_piece):
+                return msg(error, 'same color piece on target square')
+            else:
+                return msg(error=False, description=f'capturing {target_piece.kind} on {desti_square.get_pos()}')
+
+        return True
 
     def is_pawn_moving_forward(self, start, desti):
         row_1 = start.number
@@ -82,6 +84,7 @@ class Game:
             msg_type = 'valid move ->'
         
         print(f'{msg_type} {description}')
+        return error
     
     def is_move_in_range(self, piece, path):
         #print(f'total distance {len(path) + 1} of {piece.get_kind()} of range {piece.get_range()}')
@@ -129,6 +132,8 @@ class Game:
             self.player_color = 'B'
         else: 
             self.player_color = 'W'
+        
+        self.message(error=False, description=f'valid move to {destination.get_pos()}')
 
     def is_same_color(self, piece_1, piece_2):
         return piece_1.color == piece_2.color
