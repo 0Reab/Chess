@@ -4,3 +4,10 @@ so what do I do
 have square still initialize as their objects, and have square.method available -> but method for checking if square is populated needs to be fixed
 
 into something like -> return True if self.piece. else False
+
+solved that none tpye dumb bug
+
+piece movement, consider all possible moves like pawn captures diagonally
+prune those moves if destination square is not ocupied by opponents piece
+or if the pawn moved already then it cannot go two squares forward
+
