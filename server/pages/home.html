@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+
+{% block title %}
+Home page
+{% endblock %}
+
+
+{% block body %}
+
+{% if nickname %} <p>Hello {{ nickname }}!</p> {% endif %}
+
+<form action="/set-nickname" method="post">
+    <div>
+        <label for="name">Nickname:</label>
+        <input type="text" id="nickname" name="nickname" required>
+    </div>
+
+    <div>
+        <button type="submit">Submit</button>
+    </div>
+</form>
+
+<form action="/join-game" method="post">
+    <div>
+        <label for="code">Code:</label>
+        <input type="text" id="code" name="code" required>
+    </div>
+
+    <div>
+        <button type="submit">Submit</button>
+    </div>
+</form>
+
+<form action="/generate-game-code" method="get">
+    <div>
+        <button type="submit">Generate invite code</button>
+    </div>
+</form>
+
+{% if code %} <p>Your invite code: {{ code }}</p> {% endif %}
+
+
+{% endblock %}
