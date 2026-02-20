@@ -66,8 +66,8 @@ class Game:
         print(f'{msg_type} {description}')
     
     def is_move_in_range(self, piece, path):
-        # not implemented for nyow
-        return True
+        #print(f'total distance {len(path) + 1} of {piece.get_kind()} of range {piece.get_range()}')
+        return piece.get_range() >= len(path) + 1 # path doesn't include end square
         
     def get_path(self, moving_piece, start, destination):
         # returns all squares in between start square and destination square
@@ -98,14 +98,12 @@ class Game:
             path_start = full_path.index(start) + 1 # ommit start square: idx+1
             path_end = full_path.index(destination)
 
-        print(type(path_start))
-        print(type(path_end))
-
         path = full_path[path_start : path_end]
         return path
 
     def move(self, piece, start, destination):
         # move piece and clear previous square
+        piece.update()
         destination.set_piece(piece)
         start.clear()
 

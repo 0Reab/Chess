@@ -2,14 +2,21 @@ class Piece:
     def __init__(self, col, row, captured=False):
         self.row = row
         self.col = col 
-        self.range = 8
+        self.range = 7
         self.exists = True
+        self.has_moved = False
         self.piece_data = self.__square_to_piece(row,col, captured)
 
         if self.piece_data:
             self.kind, self.color = self.piece_data
         else:
             self.kind, self.color = None, None
+
+    def update(self):
+        self.has_moved = True
+
+        match self.kind:
+            case 'pawn' | 'king': self.range = 1
 
     def existing(self):
         return self.exists
@@ -54,7 +61,7 @@ class Piece:
 
         if row in [2,7]:
             kind = 'pawn'
-            self.range = 1
+            self.range = 2
             return [kind, color]
 
         match col:
