@@ -5,12 +5,14 @@ class Game:
     def __init__(self):
         self.board = Board()
         self.running = True
-        self.players = ['W', 'B'] # read as ['white', 'black']
+        self.players = ['W', 'B'] # aka ['white', 'black']
         self.player_color = self.players[0]
 
     def play(self):
         while self.running:
             board = self.board
+            msg = lambda error, description: self.msg(error, description)
+            error = True
             print(board)
 
             # get players move attempt
@@ -24,38 +26,54 @@ class Game:
             moving_piece = start_square.get_piece()
             target_piece = desti_square.get_piece()
 
+            path = self.get_path(moving_piece, start_square, desti_square)
+
             if moving_piece.get_color() != self.player_color:
-                print('you cant move your opponents pieces')
+                msg(error, 'you cant move your opponents pieces')
                 continue
 
-            path = self.get_path(moving_piece, start_square, desti_square)
-            for square in path:
-                if square.is_ocupied():
-                    print('invalid move, you cant move thru pieces')
-                    continue
+            if not self.is_move_in_range(moving_piece, path):
+                msg(error, 'exceeded piece range')
+                continue
 
-            # is move legal
+            if self.path_obstructed(path):
+                msg(error, 'you cant move thru pieces')
+                continue
+
             if desti_square.is_ocupied():
                 if self.is_same_color(moving_piece, target_piece):
-                    print('invalid move, same color piece on target square')
+                    msg(error, 'same color piece on target square')
                     continue
 
                 print(f'valid move capturing {target_piece.get_kind()} on {desti_square.get_pos()}')
 
-            # -> dissalow move conditions -> methods
-            # if piece is pinned
-            # if your piece is king, and target square is under attack by opponents pieces
-            # only move your own pieces xd
-
-            #print(moving_piece)
-            #print(start_square)
-            #print(desti_square)
             self.move(moving_piece, start_square, desti_square)
 
             print(f'valid move to {desti_square.get_pos()}')
+
+    def path_obstructed(self, path):
+        for square in path:
+            if square.is_ocupied():
+                return True
+        return False
+    
+    def msg(self, error=False, description=''):
+        if error:
+            msg_type = 'invalid move ->'
+        else:
+            msg_type = 'valid move ->'
         
-    def get_path(self, piece, start, destination):
+        print(f'{msg_type} {description}')
+    
+    def is_move_in_range(self, piece, path):
+        # not implemented for nyow
+        return True
+        
+    def get_path(self, moving_piece, start, destination):
         # returns all squares in between start square and destination square
+        if moving_piece.get_kind() == 'knight':
+            return []
+
         path = None
         full_path = None
         board = self.board
@@ -80,8 +98,10 @@ class Game:
             path_start = full_path.index(start) + 1 # ommit start square: idx+1
             path_end = full_path.index(destination)
 
-        path = full_path[path_start, path_end]
+        print(type(path_start))
+        print(type(path_end))
 
+        path = full_path[path_start : path_end]
         return path
 
     def move(self, piece, start, destination):
