@@ -97,7 +97,7 @@ class Board:
         x = piece_pos[0]
         y = piece_pos[1]
 
-        if piece.color == 'w':
+        if piece.color == 'W':
             x -= piece.range
         else:
             x += piece.range
