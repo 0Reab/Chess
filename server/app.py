@@ -1,10 +1,12 @@
 from flask import Flask, render_template, request, make_response
-import random
-import os
 from backend import *
+import os
 
 
 app = Flask(__name__, template_folder='pages')
+
+codes = []
+
 
 def read_key():
     """ read flask key from file """
@@ -39,10 +41,12 @@ def join_game():
         nickname = request.cookies.get('nickname')
         msg = 'something went wong :p'
 
-        if is_code_valid(code):
-            resp = render_template('game.html', nickname=nickname) # add opponent nick too
-        else:
+        code_obj = get_code(codes)
+
+        if code_obj.is_expired():
             resp = render_template('home.html', nickname=nickname, msg=msg)
+        else:
+            resp = render_template('game.html', nickname=nickname) # add opponent nick too
 
         return resp
 
@@ -51,9 +55,10 @@ def join_game():
 def generate_game_code():
     if request.method == 'GET':
         nickname = request.cookies.get('nickname')
-        code = random.randint(10000,99999)
+        code = Code(owner=nickname)
+        codes.append(code)
 
-        resp = make_response(render_template('home.html', nickname=nickname, code=code))
+        resp = make_response(render_template('home.html', nickname=nickname, code=code.code))
         return resp
 
 
