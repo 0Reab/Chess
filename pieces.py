@@ -12,19 +12,23 @@ class Piece:
         else:
             self.kind, self.color = None, None
 
-    def update(self):
+    def update(self) -> None:
+        '''Updates piece properties/flags such as move range etc.'''
         self.has_moved = True
 
         match self.kind:
             case 'pawn' | 'king': self.range = 1
 
-    def get_data(self): # simple fetch data
+    def get_data(self) -> tuple[str, str]:
+        '''Return piece kind and color'''
         return [self.kind, self.color]
 
-    def show(self): # just for display
+    def show(self) -> str:
+        '''Display piece, eg. 'p' for pawn'''
         return self.kind[0]
     
-    def __square_to_piece(self, row, col, captured):
+    def __square_to_piece(self, row, col, captured) -> tuple[str, str]:
+        '''Based on square position, initialize appropriate piece for the square'''
         # implement pawn promotion handling when initializing a piece
         if captured:
             self.exists = False 

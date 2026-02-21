@@ -11,3 +11,13 @@ piece movement, consider all possible moves like pawn captures diagonally
 prune those moves if destination square is not ocupied by opponents piece
 or if the pawn moved already then it cannot go two squares forward
 
+
+###
+seems like i have a "captured" arg in initializing a piece object.
+and it sets self.exists to false.
+and it's used in clear() square method
+
+that looks very odd, possibly gonna cause big bug
+
+so if you move a piece, and clear previous start square after legit move, you should clear that squares piece object
+maybe i just called it caputre by mistake, need to figure how its actually used in game flow.
