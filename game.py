@@ -10,7 +10,8 @@ class Game:
         self.message = lambda error, description: self.msg(error, description)
         self.error = True
 
-    def play(self):
+    def play(self) -> None:
+        '''Main game loop, passing turns'''
         while self.running:
             board = self.board
             print(board)
@@ -33,7 +34,8 @@ class Game:
 
             print()
 
-    def move_is_legal(self, moving_piece, target_piece, start_square, desti_square):
+    def move_is_legal(self, moving_piece, target_piece, start_square, desti_square) -> bool:
+        '''Check if move is legal, if not -> give reason via msg()'''
         msg = self.message
         error = self.error
         path = self.get_path(moving_piece, start_square, desti_square)
@@ -62,7 +64,8 @@ class Game:
 
         return True
 
-    def is_pawn_moving_forward(self, start, desti):
+    def is_pawn_moving_forward(self, start, desti) -> bool:
+        '''Determine move direction based on player color and start-end squares'''
         row_1 = start.number
         row_2 = desti.number
 
@@ -71,13 +74,15 @@ class Game:
         else:
             return row_1 > row_2
 
-    def path_obstructed(self, path):
+    def path_obstructed(self, path) -> bool:
+        '''Check each square in between start square and end square'''
         for square in path:
             if square.is_ocupied():
                 return True
         return False
     
-    def msg(self, error=False, description=''):
+    def msg(self, error=False, description='') -> bool:
+        '''Print reason for error and return bool'''
         if error:
             msg_type = 'invalid move ->'
         else:
@@ -86,12 +91,13 @@ class Game:
         print(f'{msg_type} {description}')
         return error
     
-    def is_move_in_range(self, piece, path):
+    def is_move_in_range(self, piece, path) -> bool:
+        '''Check piece range against path to destination'''
         #print(f'total distance {len(path) + 1} of {piece.get_kind()} of range {piece.get_range()}')
         return piece.range >= len(path) + 1 # path doesn't include end square
         
-    def get_path(self, moving_piece, start, destination):
-        # returns all squares in between start square and destination square
+    def get_path(self, moving_piece, start, destination) -> list:
+        '''Returns all squares in between start square and destination square'''
         if moving_piece.kind == 'knight':
             return []
 
@@ -122,7 +128,8 @@ class Game:
         path = full_path[path_start : path_end]
         return path
 
-    def move(self, piece, start, destination):
+    def move(self, piece, start, destination) -> bool:
+        '''Move the piece and clear previous square -> log message'''
         # move piece and clear previous square
         piece.update()
         destination.set_piece(piece)
@@ -133,12 +140,14 @@ class Game:
         else: 
             self.player_color = 'W'
         
-        self.message(error=False, description=f'valid move to {destination.get_pos()}')
+        return self.message(error=False, description=f'valid move to {destination.get_pos()}')
 
-    def is_same_color(self, piece_1, piece_2):
+    def is_same_color(self, piece_1, piece_2) -> bool:
+        '''Are two pieces same color'''
         return piece_1.color == piece_2.color
 
-    def prompt_player(self):
+    def prompt_player(self) -> tuple[str, int]:
+        '''Prompt player to select a square eg. "E2" -> and return it'''
         selected = input(f'player {self.player_color} select square: ') # eg. 'E2'
 
         col = selected[0]
