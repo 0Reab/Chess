@@ -6,4 +6,23 @@ Game page
 
 {% block body %}
 <h1>Game</h1>
+
+<div>
+    <h2>Board</h2>
+    <div class="board">
+        {% for row in board %}
+            <div class="row">
+            {% for piece, color in row %}
+
+            <div class="square">
+              <img class="background" source="/static/images/{{ color }}square.png">
+              {% if piece %}<img class="piece" src="/static/images/{{ piece }}.svg">{% endif %}
+            </div>
+
+            {% endfor %}
+            </div>
+        {% endfor %}
+    </div>
+</div>
+
 {% endblock %}

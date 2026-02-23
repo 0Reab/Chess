@@ -33,6 +33,20 @@ class Game:
             self.move(moving_piece, start_square, desti_square)
 
             print()
+    
+    def get_board_state(self) -> list:
+        result = []
+
+        for row in self.board.board:
+            row_result = []
+            for square in row:
+                if square.is_ocupied():
+                    row_result.append([square.piece.svg, square.piece.color[0]])
+                else:
+                    row_result.append(['', ''])
+            result.append(row_result)
+        
+        return result[::-1] # for player 1 perspective or naur
 
     def move_is_legal(self, moving_piece, target_piece, start_square, desti_square) -> bool:
         '''Check if move is legal, if not -> give reason via msg()'''
@@ -156,5 +170,5 @@ class Game:
         return [col, row]
 
 
-game = Game()
-game.play()
+#game = Game()
+#game.play()

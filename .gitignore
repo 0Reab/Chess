@@ -3,3 +3,4 @@
 tmp.py
 /server/*.txt
 /server/__pycache__
+/.vscode

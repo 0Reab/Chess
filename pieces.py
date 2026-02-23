@@ -8,9 +8,9 @@ class Piece:
         self.piece_data = self.__square_to_piece(row,col, captured)
 
         if self.piece_data:
-            self.kind, self.color = self.piece_data
+            self.kind, self.color, self.svg = self.piece_data
         else:
-            self.kind, self.color = None, None
+            self.kind, self.color, self.svg = None, None, None
 
     def update(self) -> None:
         '''Updates piece properties/flags such as move range etc.'''
@@ -32,13 +32,13 @@ class Piece:
         # implement pawn promotion handling when initializing a piece
         if captured:
             self.exists = False 
-            return [None, None]
+            return [None, None, None]
 
         if row not in [1,2,7,8]:
             self.exists = False
-            return [None, None]
+            return [None, None, None]
         
-        color, kind = '', ''
+        color, kind, svg = '', '', ''
 
         if row in [1,2]:
             color = "W"
@@ -48,7 +48,8 @@ class Piece:
         if row in [2,7]:
             kind = 'pawn'
             self.range = 2
-            return [kind, color]
+            svg = f'{color.lower()}{kind[0].upper()}'
+            return [kind, color, svg]
 
         match col:
             case 'A'|'H': kind = 'rook'
@@ -57,4 +58,5 @@ class Piece:
             case 'D': kind = 'queen'
             case 'E': kind = 'king' ; self.range = 1
         
-        return [kind, color]
+        svg = f'{color.lower()}{kind[0].upper()}'
+        return [kind, color, svg]
