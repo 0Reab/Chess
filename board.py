@@ -67,9 +67,53 @@ class Board:
 
         return [ row[col] for row in self.board ]
 
-    def get_diags(self, square) -> list[Square]:
-        '''Get whole diagonals of the input square'''
-        return NotImplemented
+    def __get_diagonal_half(self, square, direction) -> list[int]:
+        '''Helper method - Get half of a diagonal of the input square, specify direction via compass sign "NW" -> northwest half diagonal'''
+        result = []
+
+        # top left half of the diagonal
+        current = self.get_array_idx(square)
+        x, y = current[0], current[1]
+
+        while True:
+            match direction: # compass world directions
+                case 'NW': current = [ x+1, y-1 ] # (1 step top left square)
+                case 'NE': current = [ x+1, y+1 ] # (1 step top right square)
+                case 'SW': current = [ x-1, y-1 ] # (1 step bottom left square)
+                case 'SE': current = [ x-1, y+1 ] # (1 step bottom right square)
+
+            x, y = current[0], current[1]
+
+            if self.in_bounds(x, y):
+                result.append(current)
+            else:
+                break
+
+        return result
+
+    def get_diagonal(self, square, direction: str) -> list[Square]:
+        '''Full diagonal for eg - from: North West -> South East (top left -> bottom right) of your given square - Choose diagonal "NW-SE" or "NE-SW" with arg'''
+
+        # chosen diagonal from arg
+        if direction == 'NW-SE':
+            top_dir, bottom_dir = 'NW', 'SE'
+        if direction == 'NE-SW':
+            top_dir, bottom_dir = 'NE', 'SW'
+
+        # get diagonal halves (lists of indices)
+        top_idxs = self.__get_diagonal_half(square, top_dir)
+        bottom_idxs = self.__get_diagonal_half(square, bottom_dir)
+
+        # reverse top, result arr starts from board edge
+        top_squares = [ self.board[row][col] for row, col in top_idxs ][::-1]
+        bottom_squares = [ self.board[row][col] for row, col in bottom_idxs]
+
+        diagonal = top_squares + [square] + bottom_squares
+
+        return diagonal
+
+    def in_bounds(self, x, y):
+        return x in range(0,8) and y in range(0,8)
 
     def get_square(self, position) -> Square:
         '''From notation (eg. E4) return square object from the board'''

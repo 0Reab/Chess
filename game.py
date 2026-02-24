@@ -31,6 +31,7 @@ class Game:
             return self.move(moving_piece, start_square, desti_square)
 
     def get_board_state(self) -> list:
+        '''Data from board for frontend HTML template'''
         result = []
         colors = ['B', 'W']
         i = 0
@@ -132,10 +133,17 @@ class Game:
         vertical = board.get_vertical_file(start)
         horizontal = board.get_horizontal_file(start)
 
+        diagonal_nw_se = board.get_diagonal(start, direction='NW-SE')
+        diagonal_ne_sw = board.get_diagonal(start, direction='NE-SW')
+
         if destination in vertical:
             full_path = vertical
         elif destination in horizontal:
             full_path = horizontal
+        elif destination in diagonal_nw_se:
+            full_path = diagonal_nw_se
+        elif destination in diagonal_ne_sw:
+            full_path = diagonal_ne_sw
         else:
             raise AttributeError("Failed to find a path to destination square.")
 
