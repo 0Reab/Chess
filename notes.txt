@@ -22,7 +22,5 @@ that looks very odd, possibly gonna cause big bug
 so if you move a piece, and clear previous start square after legit move, you should clear that squares piece object
 maybe i just called it caputre by mistake, need to figure how its actually used in game flow.
 
-
-possible bug, when checking the path to a given square from x via 1d array like file or diagonal
-how does the logic for checking path to destination both ways work, if we are splitting by square ok, if by piece then having two pawns in same file could bug it out??
-edit: i think we chilling, it's only squares checked, and getting indicies of the path array for math based path calculation and the path is checked simply by if the square is ocupied bleh
+moving to invalid square like random square will fail under get_path method as in path obstructed it fails the move ok, just not logging properly not a biggie for now
+### sorted out - just added an early legal move fail if path is none

@@ -64,6 +64,9 @@ class Game:
         msg = self.message
         path = self.get_path(moving_piece, start_square, desti_square)
 
+        if not path:
+            return msg(False, 'cannot find path to destination square')
+
         if moving_piece.kind == 'pawn':
             if not self.is_pawn_moving_forward(start_square, desti_square):
                 return msg(False, 'pawns only go forward')
@@ -100,6 +103,8 @@ class Game:
 
     def path_obstructed(self, path) -> bool:
         '''Check each square in between start square and end square'''
+        if path == None:
+            return True
         for square in path:
             if square.is_ocupied():
                 return True
@@ -145,7 +150,7 @@ class Game:
         elif destination in diagonal_ne_sw:
             full_path = diagonal_ne_sw
         else:
-            raise AttributeError("Failed to find a path to destination square.")
+            return None
 
         path_start = full_path.index(start) + 1 # ommit start square: idx+1
         path_end = full_path.index(destination)
