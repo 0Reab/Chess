@@ -24,3 +24,10 @@ maybe i just called it caputre by mistake, need to figure how its actually used 
 
 moving to invalid square like random square will fail under get_path method as in path obstructed it fails the move ok, just not logging properly not a biggie for now
 ### sorted out - just added an early legal move fail if path is none
+
+what is left:
+pawns proper diagonal movement, only for capture (and make sure it's disallows 2 square distance for capture)
+promoting pawns
+is king in check method
+if that method is true, check if it's mate
+castling rights and castling as a move - this will be fun :p
