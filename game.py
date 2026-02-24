@@ -8,17 +8,15 @@ class Game:
         self.players = ['W', 'B'] # aka ['white', 'black']
         self.player_color = self.players[0]
         self.message = lambda error, description: self.msg(error, description)
-        self.error = True
 
-    def play(self) -> None:
+    def play(self, start, desti) -> bool:
         '''Main game loop, passing turns'''
-        while self.running:
+        if self.running:
             board = self.board
-            print(board)
 
             # get players move attempt
-            start_square = board.get_square(self.prompt_player())
-            desti_square = board.get_square(self.prompt_player())
+            start_square = board.get_square(start)
+            desti_square = board.get_square(desti)
 
             # legal and illegal moves of a given piece in this square
             all_piece_moves = board.get_moves(start_square)
@@ -28,22 +26,34 @@ class Game:
             target_piece = desti_square.piece
 
             if not self.move_is_legal(moving_piece, target_piece, start_square, desti_square):
-                continue
+                return False
 
-            self.move(moving_piece, start_square, desti_square)
+            return self.move(moving_piece, start_square, desti_square)
 
-            print()
-    
     def get_board_state(self) -> list:
         result = []
+        colors = ['B', 'W']
+        i = 0
 
         for row in self.board.board:
             row_result = []
+            # alternate for row (board colors)
+            if i:
+                i -=1
+            else:
+                i +=1
+
             for square in row:
-                if square.is_ocupied():
-                    row_result.append([square.piece.svg, square.piece.color[0]])
+                # alterante B/W each square (board colors) - jank
+                if i:
+                    i -=1
                 else:
-                    row_result.append(['', ''])
+                    i +=1
+
+                if square.is_ocupied():
+                    row_result.append([square.piece.svg, colors[i], square.get_notation()])
+                else:
+                    row_result.append(['', colors[i], square.get_notation()])
             result.append(row_result)
         
         return result[::-1] # for player 1 perspective or naur
@@ -51,32 +61,31 @@ class Game:
     def move_is_legal(self, moving_piece, target_piece, start_square, desti_square) -> bool:
         '''Check if move is legal, if not -> give reason via msg()'''
         msg = self.message
-        error = self.error
         path = self.get_path(moving_piece, start_square, desti_square)
 
         if moving_piece.kind == 'pawn':
             if not self.is_pawn_moving_forward(start_square, desti_square):
-                return msg(error, 'pawns only go forward')
+                return msg(False, 'pawns only go forward')
 
         if start_square == desti_square:
-            return msg(error, 'you cannot move to start square')
+            return msg(False, 'you cannot move to start square')
 
         if moving_piece.color != self.player_color:
-            return msg(error, 'you cant move your opponents pieces')
+            return msg(False, 'you cant move your opponents pieces')
 
         if not self.is_move_in_range(moving_piece, path):
-            return msg(error, 'exceeded piece range')
+            return msg(False, 'exceeded piece range')
 
         if self.path_obstructed(path):
-            return msg(error, 'you cant move thru pieces')
+            return msg(False, 'you cant move thru pieces')
 
         if desti_square.is_ocupied():
             if self.is_same_color(moving_piece, target_piece):
-                return msg(error, 'same color piece on target square')
+                return msg(False, 'same color piece on target square')
             else:
-                return msg(error=False, description=f'capturing {target_piece.kind} on {desti_square.get_pos()}')
+                return msg(True, description=f'capturing {target_piece.kind} on {desti_square.get_pos()}')
 
-        return True
+        return msg(True, description=f'{desti_square.get_pos()}')
 
     def is_pawn_moving_forward(self, start, desti) -> bool:
         '''Determine move direction based on player color and start-end squares'''
@@ -95,15 +104,16 @@ class Game:
                 return True
         return False
     
-    def msg(self, error=False, description='') -> bool:
+    def msg(self, result, description='') -> None:
         '''Print reason for error and return bool'''
-        if error:
-            msg_type = 'invalid move ->'
-        else:
+        if result == True:
             msg_type = 'valid move ->'
+
+        if result == False:
+            msg_type = 'invalid move ->'
         
         print(f'{msg_type} {description}')
-        return error
+        return result
     
     def is_move_in_range(self, piece, path) -> bool:
         '''Check piece range against path to destination'''
@@ -126,6 +136,8 @@ class Game:
             full_path = vertical
         elif destination in horizontal:
             full_path = horizontal
+        else:
+            raise AttributeError("Failed to find a path to destination square.")
 
         path_start = full_path.index(start) + 1 # ommit start square: idx+1
         path_end = full_path.index(destination)
@@ -154,7 +166,7 @@ class Game:
         else: 
             self.player_color = 'W'
         
-        return self.message(error=False, description=f'valid move to {destination.get_pos()}')
+        return True
 
     def is_same_color(self, piece_1, piece_2) -> bool:
         '''Are two pieces same color'''

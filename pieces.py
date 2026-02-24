@@ -59,4 +59,8 @@ class Piece:
             case 'E': kind = 'king' ; self.range = 1
         
         svg = f'{color.lower()}{kind[0].upper()}'
+
+        if kind == 'knight': # ductape edgecase
+            svg = color.lower()+'N'
+
         return [kind, color, svg]

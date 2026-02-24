@@ -12,8 +12,12 @@ class Square:
         return self.piece if self.piece.exists else None
 
     def get_pos(self) -> tuple[str, int]:
-        '''Get square notation eg. -> ["E", 4]'''
+        '''Get square notation data eg. -> ["E", 4]'''
         return [self.letter, self.number]
+    
+    def get_notation(self) -> str:
+        '''Get square display notation eg. -> "E4"'''
+        return ''.join([self.letter, str(self.number)])
 
     def set_piece(self, piece) -> None:
         '''Update square with new piece'''

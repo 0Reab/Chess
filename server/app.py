@@ -5,6 +5,7 @@ import os
 
 app = Flask(__name__, template_folder='pages')
 codes = []
+game = None
 
 
 def read_key():
@@ -24,16 +25,22 @@ def home():
  
 @app.route('/', methods=['GET'])
 def home():
+    global game 
+
     # debug mode
-    if request.method == 'GET':
-        nickname = 'debug player 1'
-        opponent = 'debug player 2'
+    if game == None:
+        game = start_game()
+    else:
+        start = request.args.get("move_start")
+        desti = request.args.get("move_desti")
+        game.play(start, desti)
 
-        game = start_game() 
-        board = game.get_board_state()
+    nickname = 'debug player 1'
+    opponent = 'debug player 2'
+    board = game.get_board_state()
+    print(game.board)
 
-        return render_template('game.html', nickname=nickname, board=board, opponent=opponent)
-
+    return render_template('game.html', nickname=nickname, board=board, opponent=opponent)
 
 @app.route('/set-nickname', methods=['POST'])
 def set_nickname():

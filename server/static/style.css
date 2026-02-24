@@ -17,6 +17,10 @@
   height: 100px;
 }
 
+.selected {
+  outline: 3px solid red;
+}
+
 .square .background,
 .square .piece {
   position: absolute;
@@ -25,8 +29,12 @@
   height: 100%;
 }
 
-.square .piece {
-  z-index: 2;
+.background {
+  pointer-events: none;
+}
+
+.piece{
+  pointer-events: none;
 }
 
 body {

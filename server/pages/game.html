@@ -12,10 +12,10 @@ Game page
     <div class="board">
         {% for row in board %}
             <div class="row">
-            {% for piece, color in row %}
+            {% for piece, color, notation in row %}
 
-            <div class="square">
-              <img class="background" source="/static/images/{{ color }}square.png">
+            <div class="square" id="{{ notation }}" onclick="handleClick(this)">
+              <img class="background" src="/static/images/{{ color }}square.png">
               {% if piece %}<img class="piece" src="/static/images/{{ piece }}.svg">{% endif %}
             </div>
 
@@ -25,4 +25,5 @@ Game page
     </div>
 </div>
 
+<script src="/static/move_attempt.js"></script>
 {% endblock %}

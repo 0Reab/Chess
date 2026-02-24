@@ -75,6 +75,7 @@ class Board:
         '''From notation (eg. E4) return square object from the board'''
         # row is number, col is letter E4
         col, row = position
+        row = int(row)
         row -= 1 # adjust for 0 indexed array;
         col_idx = 0
 
