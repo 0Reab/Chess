@@ -53,7 +53,7 @@ class Piece:
 
         match col:
             case 'A'|'H': kind = 'rook'
-            case 'B'|'G': kind = 'knight' ; self.range = -1
+            case 'B'|'G': kind = 'knight'
             case 'C'|'F': kind = 'bishop'
             case 'D': kind = 'queen'
             case 'E': kind = 'king' ; self.range = 1

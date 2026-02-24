@@ -112,7 +112,10 @@ class Board:
 
         return diagonal
 
-    def in_bounds(self, x, y):
+    def in_bounds(self, x=None, y=None, array=None) -> bool:
+        '''Check if indices x and y (or array [x,y]) are within board array bounds'''
+        if array:
+            x, y = array[0], array[1]
         return x in range(0,8) and y in range(0,8)
 
     def get_square(self, position) -> Square:
@@ -130,8 +133,30 @@ class Board:
         square = self.board[row][col_idx]
         return square
 
+    def get_knight_moves(self, square) -> list[Square]:
+        current = self.get_array_idx(square)
+        x, y = current[0], current[1] # current xy pos
+
+        coord_list = [ # knight transforms
+            [ x+2, y-1 ], # NW top
+            [ x+1, y-2 ], # NW dwn
+
+            [ x+2, y+1 ], # NE top
+            [ x+1, y+2 ], # NE dwn
+
+            [ x-2, y-1 ], # SW top
+            [ x-1, y-2 ], # SW dwn
+
+            [ x-2, y+1 ], # SE top
+            [ x-1, y+2 ] # SE dwn
+        ]
+
+        squares = [ self.board[x][y] for x, y in coord_list if self.in_bounds(x, y) ]
+
+        return squares
+
     def get_moves(self, square) -> list[Square]:
-        '''All possible piece moves of the given square'''
+        '''All possible piece moves of the given square -> obsolete'''
         moves = []
         piece = square.piece
 

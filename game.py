@@ -64,12 +64,16 @@ class Game:
         msg = self.message
         path = self.get_path(moving_piece, start_square, desti_square)
 
-        if not path:
+        if path == None:
             return msg(False, 'cannot find path to destination square')
 
         if moving_piece.kind == 'pawn':
             if not self.is_pawn_moving_forward(start_square, desti_square):
                 return msg(False, 'pawns only go forward')
+
+        if moving_piece.kind == 'knight':
+            if desti_square not in self.board.get_knight_moves(start_square):
+                return msg(False, 'destination not in knight square list')
 
         if start_square == desti_square:
             return msg(False, 'you cannot move to start square')
