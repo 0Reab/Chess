@@ -32,3 +32,5 @@ promoting pawns
 is king in check method
 if that method is true, check if it's mate
 castling rights and castling as a move - this will be fun :p
+dissalow pawns to move capture moving forward
+dissalow king to move next to the opponent king - will cover this case in is_square_attacked() too

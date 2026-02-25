@@ -64,8 +64,18 @@ class Game:
         msg = self.message
         path = self.get_path(moving_piece, start_square, desti_square)
 
+        if start_square == desti_square:
+            return msg(False, 'you cannot move to start square')
+
+        if moving_piece.color != self.player_color:
+            return msg(False, 'you cant move your opponents pieces')
+
         if path == None:
             return msg(False, 'cannot find path to destination square')
+
+        if moving_piece.kind == 'king':
+            if self.is_square_attacked(start_square, desti_square):
+               return msg(False, 'king can not go to attacked square')
 
         if moving_piece.kind == 'pawn':
             if not self.is_pawn_moving_forward(start_square, desti_square):
@@ -74,16 +84,13 @@ class Game:
             if self.is_pawn_moving_diagonally(start_square, desti_square):
                 if self.is_pawn_capture_valid(desti_square, path):
                     return msg(False, 'illegal pawn capture')
+            else:
+                if desti_square.is_ocupied():
+                    return msg(False, 'pawns path forward is blocked')
 
         if moving_piece.kind == 'knight':
             if desti_square not in self.board.get_knight_moves(start_square):
                 return msg(False, 'destination not in knight square list')
-
-        if start_square == desti_square:
-            return msg(False, 'you cannot move to start square')
-
-        if moving_piece.color != self.player_color:
-            return msg(False, 'you cant move your opponents pieces')
 
         if not self.is_move_in_range(moving_piece, path):
             return msg(False, 'exceeded piece range')
@@ -98,6 +105,85 @@ class Game:
                 return msg(True, description=f'capturing {target_piece.kind} on {desti_square.get_pos()}')
 
         return msg(True, description=f'{desti_square.get_pos()}')
+
+    def is_square_attacked(self, start, desti):
+        '''Check if square is attacked by opponents piece (for king mainly)'''
+        my_color = self.player_color
+        board = self.board
+        possible_knight_moves = self.board.get_knight_moves(desti)
+
+        # check if knight is attacking the destination square
+        for square in possible_knight_moves:
+            if square.piece.kind == 'knight':
+                if square.piece.color != my_color:
+                    return True
+
+        # checking if square is covered by opponents pawn
+        # take destination square and find its diagonal 1 up left, and 1 up right squares (respectively for color)
+        x, y = board.get_array_idx(desti)
+        if my_color == 'W': # adjust row based on player color
+            x +=1
+        else:
+            x -=1
+
+        top_left = [x, y-1]
+        top_right = [x, y+1]
+
+        left_valid = board.in_bounds(array=top_left)
+        right_valid = board.in_bounds(array=top_right)
+
+        if left_valid:
+            row, col = top_left[0], top_left[1]
+            square_left = board.board[row][col]
+            if square_left.piece.kind == 'pawn' and square_left.piece.color != my_color: 
+                return True
+
+        if right_valid:
+            row, col = top_right[0], top_right[1]
+            square_right = board.board[row][col]
+            if square_right.piece.kind == 'pawn' and square_right.piece.color != my_color: 
+                return True
+        
+        # pawns are not attacking the square - checking for other pieces now (rooks, bishops, queen and king)
+        # check files and diags for unobstructed paths to opponent piece
+
+        diagnonal_ne_sw = board.get_diagonal(desti, 'NE-SW')
+        diagnonal_nw_se = board.get_diagonal(desti, 'NW-SE')
+
+        vertical = board.get_vertical_file(desti)
+        horizontal = board.get_horizontal_file(desti)
+
+        x, y = board.get_array_idx(desti)
+
+        def can_piece_see_the_square(aggressor, full_path, desti, moving_piece):
+            for square in full_path:
+                if square.piece.kind == aggressor and square.piece.color != my_color:
+                    path = self.get_path(moving_piece, desti, square) # odd args because we are checking for desti square not start
+                    if aggressor == 'king':
+                        if len(path) <= 0:
+                            print(f'hit king edge case for {aggressor} - {len(path)}')
+                            return True # edge case for the king
+                        return
+                    if not self.path_obstructed(path):
+                        print(f'hit king edge case for {aggressor} - {len(path)}')
+                        return True # opponent "piece" can see us
+
+        if can_piece_see_the_square('rook', vertical, desti, start.piece):
+            return True
+        if can_piece_see_the_square('rook', horizontal, desti, start.piece):
+            return True
+
+        if can_piece_see_the_square('bishop', diagnonal_ne_sw, desti, start.piece):
+            return True
+        if can_piece_see_the_square('bishop', diagnonal_nw_se, desti, start.piece):
+            return True
+
+        all_directions = [vertical, horizontal, diagnonal_nw_se, diagnonal_ne_sw]
+        for dir in all_directions:
+            if can_piece_see_the_square('queen', dir, desti, start.piece):
+                return True
+            if can_piece_see_the_square('king', dir, desti, start.piece):
+                return True
 
     def is_pawn_moving_forward(self, start, desti) -> bool:
         '''Determine move direction based on player color and start-end squares'''
