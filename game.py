@@ -71,6 +71,10 @@ class Game:
             if not self.is_pawn_moving_forward(start_square, desti_square):
                 return msg(False, 'pawns only go forward')
 
+            if self.is_pawn_moving_diagonally(start_square, desti_square):
+                if self.is_pawn_capture_valid(desti_square, path):
+                    return msg(False, 'illegal pawn capture')
+
         if moving_piece.kind == 'knight':
             if desti_square not in self.board.get_knight_moves(start_square):
                 return msg(False, 'destination not in knight square list')
@@ -104,6 +108,17 @@ class Game:
             return row_1 < row_2
         else:
             return row_1 > row_2
+    
+    def is_pawn_moving_diagonally(self, start, desti) -> bool:
+        '''Compare column idx of two squares'''
+        col1 = self.board.get_array_idx(start)[1]
+        col2 = self.board.get_array_idx(desti)[1]
+
+        return col1 != col2
+
+    def is_pawn_capture_valid(self, desti, path) -> bool:
+        '''Check if pawn capture attempt is legal - en pessant not implemented yet'''
+        return len(path) != 0 or desti.is_ocupied() == False # one diagonal square has lenght of path of 0
 
     def path_obstructed(self, path) -> bool:
         '''Check each square in between start square and end square'''
@@ -127,7 +142,6 @@ class Game:
     
     def is_move_in_range(self, piece, path) -> bool:
         '''Check piece range against path to destination'''
-        #print(f'total distance {len(path) + 1} of {piece.get_kind()} of range {piece.get_range()}')
         return piece.range >= len(path) + 1 # path doesn't include end square
         
     def get_path(self, moving_piece, start, destination) -> list:
@@ -145,15 +159,20 @@ class Game:
         diagonal_nw_se = board.get_diagonal(start, direction='NW-SE')
         diagonal_ne_sw = board.get_diagonal(start, direction='NE-SW')
 
-        if destination in vertical:
-            full_path = vertical
-        elif destination in horizontal:
-            full_path = horizontal
-        elif destination in diagonal_nw_se:
-            full_path = diagonal_nw_se
-        elif destination in diagonal_ne_sw:
-            full_path = diagonal_ne_sw
-        else:
+        # something is bugd here fo sho
+        if moving_piece.kind in ['king', 'queen', 'pawn', 'rook']:
+            if destination in vertical:
+                full_path = vertical
+            elif destination in horizontal:
+                full_path = horizontal
+
+        if moving_piece.kind in ['king', 'queen', 'pawn', 'bishop']:
+            if destination in diagonal_nw_se:
+                full_path = diagonal_nw_se
+            elif destination in diagonal_ne_sw:
+                full_path = diagonal_ne_sw
+        
+        if full_path == None: # failsafe check
             return None
 
         path_start = full_path.index(start) + 1 # ommit start square: idx+1
