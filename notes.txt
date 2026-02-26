@@ -1,39 +1,19 @@
-current issue is having squares initialize as none causes every square.method to throw an error, fair enough
-so what do I do 
-
-have square still initialize as their objects, and have square.method available -> but method for checking if square is populated needs to be fixed
-
-into something like -> return True if self.piece. else False
-
-solved that none tpye dumb bug
-
-piece movement, consider all possible moves like pawn captures diagonally
-prune those moves if destination square is not ocupied by opponents piece
-or if the pawn moved already then it cannot go two squares forward
-
-
 ###
 seems like i have a "captured" arg in initializing a piece object.
 and it sets self.exists to false.
 and it's used in clear() square method
 
-that looks very odd, possibly gonna cause big bug
+that looks very odd, possibly gonna cause big bug not sure what i had in mind there :p
 
 so if you move a piece, and clear previous start square after legit move, you should clear that squares piece object
 maybe i just called it caputre by mistake, need to figure how its actually used in game flow.
 
-moving to invalid square like random square will fail under get_path method as in path obstructed it fails the move ok, just not logging properly not a biggie for now
-### sorted out - just added an early legal move fail if path is none
-
 what is left:
-king cant capture protected piece cuz he would be in check
 en pessant
 promoting pawns
 is king in check method
 if that method is true, check if it's mate
 castling rights and castling as a move - this will be fun :p
-dissalow pawns to move capture moving forward
-dissalow king to move next to the opponent king - will cover this case in is_square_attacked() too
 
 edge case in king trying to capture a bishop, is deemed illegal
 another, is square attacked, fails to return true if the square is moving away from piece that gave us check.
