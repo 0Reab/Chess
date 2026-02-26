@@ -176,3 +176,15 @@ class Board:
 
         moves.append(new_pos)
         return moves
+    
+    def get_king_square(self, color) -> Square:
+        king = None
+        for row in self.board:
+            for square in row:
+                if square.piece.kind == 'king' and square.piece.color == color:
+                    king = square
+                    break
+
+        if king == None:
+            raise ValueError("King not on the board lol")
+        return king

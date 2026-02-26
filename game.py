@@ -74,8 +74,31 @@ class Game:
             return msg(False, 'cannot find path to destination square')
 
         if moving_piece.kind == 'king':
-            if self.is_square_attacked(start_square, desti_square):
-               return msg(False, 'king can not go to attacked square')
+            desti_attacked_by = self.get_square_attackers(start_square, desti_square)
+
+            if desti_attacked_by:
+                return msg(False, 'king can not go to attacked square')
+        else:
+            king = self.board.get_king_square(self.player_color)
+            king_attackers = self.get_square_attackers(king, king)
+
+            if king_attackers:
+                amount = len(king_attackers)
+                if amount >= 2:
+                    return msg(False, 'king in double check, forced king move')
+                if amount == 1:
+                    attacker = king_attackers[0]
+                    if attacker.piece.kind == 'knight':
+                        if desti_square != attacker:
+                            return msg(False, 'king in check by knight, forced attacker capture or king move')
+                    else: 
+                        path = self.get_path(king.piece, king, attacker)
+                        in_line_of_sight = desti_square in path
+
+                        if desti_square == attacker or in_line_of_sight:
+                            pass
+                        else:
+                            return msg(False, 'king in check, forced attacker capture or king move')
 
         if moving_piece.kind == 'pawn':
             if not self.is_pawn_moving_forward(start_square, desti_square):
@@ -106,8 +129,9 @@ class Game:
 
         return msg(True, description=f'{desti_square.get_pos()}')
 
-    def is_square_attacked(self, start, desti): # missing check for the squares not in between the attacker piece and our king 
-        '''Check if square is attacked by opponents piece (for king mainly)'''
+    def get_square_attackers(self, start, desti): # missing check for the squares not in between the attacker piece and our king 
+        '''Check if square is attacked by opponents piece (for king mainly) -> returns list Square obj of attackers or None'''
+        attacker_squares = [] 
         my_color = self.player_color
         board = self.board
         possible_knight_moves = self.board.get_knight_moves(desti)
@@ -116,7 +140,7 @@ class Game:
         for square in possible_knight_moves:
             if square.piece.kind == 'knight':
                 if square.piece.color != my_color:
-                    return True
+                    attacker_squares.append(square)
 
         # checking if square is covered by opponents pawn
         # take destination square and find its diagonal 1 up left, and 1 up right squares (respectively for color)
@@ -136,13 +160,13 @@ class Game:
             row, col = top_left[0], top_left[1]
             square_left = board.board[row][col]
             if square_left.piece.kind == 'pawn' and square_left.piece.color != my_color: 
-                return True
+                attacker_squares.append(square)
 
         if right_valid:
             row, col = top_right[0], top_right[1]
             square_right = board.board[row][col]
             if square_right.piece.kind == 'pawn' and square_right.piece.color != my_color: 
-                return True
+                attacker_squares.append(square)
         
         # pawns are not attacking the square - checking for other pieces now (rooks, bishops, queen and king)
         # check files and diags for unobstructed paths to opponent piece
@@ -156,34 +180,34 @@ class Game:
         x, y = board.get_array_idx(desti)
 
         def is_attacked_by(aggressor, full_path, desti=desti, moving_piece=start.piece):
+            global attacker_square
             for square in full_path:
                 if square.piece.kind == aggressor and square.piece.color != my_color:
                     path = self.get_path(moving_piece, desti, square) # odd args because we are checking for desti square not start
                     if aggressor == 'king':
                         if len(path) <= 0:
                             print(f'hit king edge case 1 for {aggressor} - {len(path)}')
-                            return True # edge case for the king
+                            attacker_squares.append(square)
+                            return # edge case for the king vs king
+                        return
+                    if len(path) == 0 and desti == square: # edge case allow capturing of pieces with king
                         return
                     if not self.path_obstructed(path):
                         print(f'hit king edge case 2 for {aggressor} - {len(path)}')
-                        return True # opponent "piece" can see us
+                        attacker_squares.append(square)
+                        return # opponent "piece" can see us
 
-        if is_attacked_by('rook', vertical):
-            return True
-        if is_attacked_by('rook', horizontal):
-            return True
-
-        if is_attacked_by('bishop', diagnonal_ne_sw):
-            return True
-        if is_attacked_by('bishop', diagnonal_nw_se):
-            return True
+        is_attacked_by('rook', vertical)
+        is_attacked_by('rook', horizontal)
+        is_attacked_by('bishop', diagnonal_ne_sw)
+        is_attacked_by('bishop', diagnonal_nw_se)
 
         all_directions = [vertical, horizontal, diagnonal_nw_se, diagnonal_ne_sw]
         for dir in all_directions:
-            if is_attacked_by('queen', dir):
-                return True
-            if is_attacked_by('king', dir):
-                return True
+            is_attacked_by('queen', dir)
+            is_attacked_by('king', dir)
+        
+        return attacker_squares if attacker_squares != [] else None
 
     def is_king_moving_horizontally(self, start, desti) -> bool:
         '''Check if row1 and row2 are equal, and if the columns differ'''
