@@ -63,6 +63,10 @@ class Game:
         '''Check if move is legal, if not -> give reason via msg()'''
         msg = self.message
         path = self.get_path(moving_piece, start_square, desti_square)
+        king = self.board.get_king_square(self.player_color)
+
+        if not start_square.is_ocupied():
+            return msg(False, 'no piece on this square to move')
 
         if start_square == desti_square:
             return msg(False, 'you cannot move to start square')
@@ -78,8 +82,7 @@ class Game:
 
             if desti_attacked_by:
                 return msg(False, 'king can not go to attacked square')
-        else:
-            king = self.board.get_king_square(self.player_color)
+        else: # could refactor this else block into methods
             king_attackers = self.get_square_attackers(king, king)
 
             if king_attackers:
@@ -99,6 +102,11 @@ class Game:
                             pass
                         else:
                             return msg(False, 'king in check, forced attacker capture or king move')
+        
+            pin_instigator = self.is_pinned(start_square, king)
+
+            if pin_instigator and pin_instigator != desti_square: # allows for capturing of pin instigator
+                return msg(False, 'This piece is pinned to the king')
 
         if moving_piece.kind == 'pawn':
             if not self.is_pawn_moving_forward(start_square, desti_square):
@@ -209,6 +217,46 @@ class Game:
         
         return attacker_squares if attacker_squares != [] else None
 
+    def is_pinned(self, start, king):
+        '''Take a full diag/file of the start and king args and determine pin state via LoS'''
+        # traverse the array from king to your start arg piece and find los of attacker
+        pinned = False
+        full_path, path_type = self.get_path(start.piece, king, start, arg_get_full_path=True)
+
+        if full_path == None or path_type == None:
+            print(f'* early return full path == None or path_type == None')
+            return False # if your king is not in moving pieces files/diags don't check if it's pinned
+        
+        king_idx = full_path.index(king)
+        start_idx = full_path.index(start)
+
+        if king_idx >= start_idx:
+            # for consistency and ease of use have king on the left of moving piece array index
+            full_path = full_path[::-1]
+
+        for idx, square in enumerate(full_path):
+            if idx > king_idx:
+                if square.is_ocupied():
+                    if idx == start_idx:
+                        continue
+                    if square.piece.color == self.player_color:
+                        print(f'* los block by friendly')
+                        break # blocked LoS by friendly
+                    else:
+                        if square.piece.kind == 'queen':
+                            print(f'* pinned by queen')
+                            return square
+
+                        if square.piece.kind == 'rook' and path_type == 'file':
+                            print(f'* pinned by rook')
+                            return square
+
+                        if square.piece.kind == 'bishop' and path_type == 'diagonal':
+                            print(f'* pinned by bishop')
+                            return square
+
+        return pinned
+
     def is_king_moving_horizontally(self, start, desti) -> bool:
         '''Check if row1 and row2 are equal, and if the columns differ'''
         row1, col1 = self.board.get_array_idx(start)
@@ -261,10 +309,13 @@ class Game:
         '''Check piece range against path to destination'''
         return piece.range >= len(path) + 1 # path doesn't include end square
         
-    def get_path(self, moving_piece, start, destination) -> list:
-        '''Returns all squares in between start square and destination square'''
+    def get_path(self, moving_piece, start, destination, arg_get_full_path=False) -> list:
+        '''Returns all squares in between start square and destination square, or the whole diag or file connecting start and dest'''
         if moving_piece.kind == 'knight':
-            return []
+            if arg_get_full_path:
+                return None, None
+            else:
+                return []
 
         path = None
         full_path = None
@@ -276,21 +327,26 @@ class Game:
         diagonal_nw_se = board.get_diagonal(start, direction='NW-SE')
         diagonal_ne_sw = board.get_diagonal(start, direction='NE-SW')
 
-        # something is bugd here fo sho
-        if moving_piece.kind in ['king', 'queen', 'pawn', 'rook']:
+        path_type = ''
+        if moving_piece.kind in ['king', 'queen', 'pawn', 'rook'] or arg_get_full_path:
+            path_type = 'file'
             if destination in vertical:
                 full_path = vertical
             elif destination in horizontal:
                 full_path = horizontal
 
-        if moving_piece.kind in ['king', 'queen', 'pawn', 'bishop']:
+        if moving_piece.kind in ['king', 'queen', 'pawn', 'bishop'] or arg_get_full_path:
+            path_type = 'diagonal'
             if destination in diagonal_nw_se:
                 full_path = diagonal_nw_se
             elif destination in diagonal_ne_sw:
                 full_path = diagonal_ne_sw
         
         if full_path == None: # failsafe check
-            return None
+            return None, None
+
+        if arg_get_full_path:
+            return full_path, path_type
 
         path_start = full_path.index(start) + 1 # ommit start square: idx+1
         path_end = full_path.index(destination)
