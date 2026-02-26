@@ -34,3 +34,6 @@ if that method is true, check if it's mate
 castling rights and castling as a move - this will be fun :p
 dissalow pawns to move capture moving forward
 dissalow king to move next to the opponent king - will cover this case in is_square_attacked() too
+
+edge case in king trying to capture a bishop, is deemed illegal
+another, is square attacked, fails to return true if the square is moving away from piece that gave us check.

@@ -161,14 +161,14 @@ class Game:
                     path = self.get_path(moving_piece, desti, square) # odd args because we are checking for desti square not start
                     if aggressor == 'king':
                         if len(path) <= 0:
-                            print(f'hit king edge case for {aggressor} - {len(path)}')
+                            print(f'hit king edge case 1 for {aggressor} - {len(path)}')
                             return True # edge case for the king
                         return
                     if not self.path_obstructed(path):
-                        print(f'hit king edge case for {aggressor} - {len(path)}')
+                        print(f'hit king edge case 2 for {aggressor} - {len(path)}')
                         return True # opponent "piece" can see us
 
-        if can_piece_see_the_square('rook', vertical, desti, start.piece):
+        if can_piece_see_the_square('rook', vertical, desti, start.piece): # can simplify args
             return True
         if can_piece_see_the_square('rook', horizontal, desti, start.piece):
             return True
@@ -184,6 +184,12 @@ class Game:
                 return True
             if can_piece_see_the_square('king', dir, desti, start.piece):
                 return True
+
+    def is_king_moving_horizontally(self, start, desti) -> bool:
+        x1, y1 = self.board.get_array_idx(start)
+        x2, y2 = self.board.get_array_idx(desti)
+
+        return x1 != x2 and y1 == y2
 
     def is_pawn_moving_forward(self, start, desti) -> bool:
         '''Determine move direction based on player color and start-end squares'''

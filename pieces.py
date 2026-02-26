@@ -56,7 +56,7 @@ class Piece:
             case 'B'|'G': kind = 'knight'
             case 'C'|'F': kind = 'bishop'
             case 'D': kind = 'queen'
-            case 'E': kind = 'king' ; self.range = 1
+            case 'E': kind = 'king' ; self.range = 2
         
         svg = f'{color.lower()}{kind[0].upper()}'
 
