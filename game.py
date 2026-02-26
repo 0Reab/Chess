@@ -106,7 +106,7 @@ class Game:
 
         return msg(True, description=f'{desti_square.get_pos()}')
 
-    def is_square_attacked(self, start, desti):
+    def is_square_attacked(self, start, desti): # missing check for the squares not in between the attacker piece and our king 
         '''Check if square is attacked by opponents piece (for king mainly)'''
         my_color = self.player_color
         board = self.board
@@ -155,7 +155,7 @@ class Game:
 
         x, y = board.get_array_idx(desti)
 
-        def can_piece_see_the_square(aggressor, full_path, desti, moving_piece):
+        def is_attacked_by(aggressor, full_path, desti=desti, moving_piece=start.piece):
             for square in full_path:
                 if square.piece.kind == aggressor and square.piece.color != my_color:
                     path = self.get_path(moving_piece, desti, square) # odd args because we are checking for desti square not start
@@ -168,28 +168,29 @@ class Game:
                         print(f'hit king edge case 2 for {aggressor} - {len(path)}')
                         return True # opponent "piece" can see us
 
-        if can_piece_see_the_square('rook', vertical, desti, start.piece): # can simplify args
+        if is_attacked_by('rook', vertical):
             return True
-        if can_piece_see_the_square('rook', horizontal, desti, start.piece):
+        if is_attacked_by('rook', horizontal):
             return True
 
-        if can_piece_see_the_square('bishop', diagnonal_ne_sw, desti, start.piece):
+        if is_attacked_by('bishop', diagnonal_ne_sw):
             return True
-        if can_piece_see_the_square('bishop', diagnonal_nw_se, desti, start.piece):
+        if is_attacked_by('bishop', diagnonal_nw_se):
             return True
 
         all_directions = [vertical, horizontal, diagnonal_nw_se, diagnonal_ne_sw]
         for dir in all_directions:
-            if can_piece_see_the_square('queen', dir, desti, start.piece):
+            if is_attacked_by('queen', dir):
                 return True
-            if can_piece_see_the_square('king', dir, desti, start.piece):
+            if is_attacked_by('king', dir):
                 return True
 
     def is_king_moving_horizontally(self, start, desti) -> bool:
-        x1, y1 = self.board.get_array_idx(start)
-        x2, y2 = self.board.get_array_idx(desti)
+        '''Check if row1 and row2 are equal, and if the columns differ'''
+        row1, col1 = self.board.get_array_idx(start)
+        row2, col2 = self.board.get_array_idx(desti)
 
-        return x1 != x2 and y1 == y2
+        return row1 == row2 and col1 != col2
 
     def is_pawn_moving_forward(self, start, desti) -> bool:
         '''Determine move direction based on player color and start-end squares'''
