@@ -130,6 +130,23 @@ class Game:
         if not self.is_move_in_range(moving_piece, path):
             return msg(False, 'exceeded piece range')
 
+        # make this into a method ye
+        #  move the rook by simply placing it behind the king and make sure to set has moved flag to true
+
+        if moving_piece.kind == 'king' and not moving_piece.has_moved:
+            if len(path) == 2 and moving_piece.row == desti_square.piece.row: # castling attempt
+                rooks_for_castling = self.board.get_rooks_for_castling(self.player_color)
+
+                if len(rooks_for_castling) == 0:
+                    return msg(False, 'no rooks available to castle with')
+                
+                if desti_square not in rooks_for_castling:
+                    if desti_square in path:
+                        self.castle()
+                    return msg(False, 'desti not in path')
+                return msg(False, 'cannot castle the king onto the rook square')
+            return msg(False, 'where is bro castling')
+
         if self.path_obstructed(path):
             return msg(False, 'you cant move thru pieces')
 
@@ -141,7 +158,7 @@ class Game:
 
         return msg(True, description=f'{desti_square.get_pos()}')
 
-    def get_square_attackers(self, start, desti) -> list | None: # missing check for the squares not in between the attacker piece and our king 
+    def get_square_attackers(self, start, desti) -> list | None: # exclude king in the path for checking attaced squares, so you cant move the king backwards into attacked square
         '''Check if square is attacked by opponents piece (for king mainly) -> returns list Square obj of attackers or None'''
         attacker_squares = [] 
         my_color = self.player_color
@@ -209,7 +226,7 @@ class Game:
 
         return attacker_squares if attacker_squares != [] else None
 
-    def is_attacked_by(self, aggressor, full_path, desti, moving_piece):
+    def is_attacked_by(self, aggressor, full_path, desti, moving_piece) -> object | None:
         for square in full_path:
             if square.piece.kind == aggressor and square.piece.color != self.player_color:
 

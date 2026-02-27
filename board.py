@@ -188,3 +188,24 @@ class Board:
         if king == None:
             raise ValueError("King not on the board lol")
         return king
+    
+    def get_rooks_for_castling(self, color) -> list:
+        '''Returns a list of rooks that haven't moved yet of your player color - still have castling rights'''
+        result = []
+        if color == 'W': # first row corner squares
+            rook1 = self.board[0][0]
+            rook2 = self.board[0][-1]
+
+        if color == 'B': # last row corner squares
+            rook1 = self.board[-1][0]
+            rook2 = self.board[-1][-1]
+        
+        if rook1.is_ocupied():
+            if not rook1.piece.has_moved():
+                result.append(rook1)
+
+        if rook2.is_ocupied():
+            if not rook2.piece.has_moved():
+                result.append(rook2)
+        
+        return result
