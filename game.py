@@ -62,8 +62,6 @@ class Game:
     def move_is_legal(self, moving_piece, target_piece, start_square, desti_square) -> bool:
         '''Check if move is legal, if not -> give reason via msg()'''
         msg = self.message
-        path = self.get_path(moving_piece, start_square, desti_square)
-        king = self.board.get_king_square(self.player_color)
 
         if not start_square.is_ocupied():
             return msg(False, 'no piece on this square to move')
@@ -74,8 +72,12 @@ class Game:
         if moving_piece.color != self.player_color:
             return msg(False, 'you cant move your opponents pieces')
 
-        if path == None:
-            return msg(False, 'cannot find path to destination square')
+        path = self.get_path(moving_piece, start_square, desti_square)
+        king = self.board.get_king_square(self.player_color)
+
+        if isinstance(path, type(None)):
+            if moving_piece.kind != 'knight':
+                return msg(False, 'cannot find path to destination square')
 
         if moving_piece.kind == 'king':
             desti_attacked_by = self.get_square_attackers(start_square, desti_square)
@@ -96,6 +98,8 @@ class Game:
                             return msg(False, 'king in check by knight, forced attacker capture or king move')
                     else: 
                         path = self.get_path(king.piece, king, attacker)
+                        if isinstance(path, type(None)):
+                            return msg(False, 'big time error 2 path == None')
                         in_line_of_sight = desti_square in path
 
                         if desti_square == attacker or in_line_of_sight:
@@ -137,7 +141,7 @@ class Game:
 
         return msg(True, description=f'{desti_square.get_pos()}')
 
-    def get_square_attackers(self, start, desti): # missing check for the squares not in between the attacker piece and our king 
+    def get_square_attackers(self, start, desti) -> list | None: # missing check for the squares not in between the attacker piece and our king 
         '''Check if square is attacked by opponents piece (for king mainly) -> returns list Square obj of attackers or None'''
         attacker_squares = [] 
         my_color = self.player_color
@@ -168,13 +172,13 @@ class Game:
             row, col = top_left[0], top_left[1]
             square_left = board.board[row][col]
             if square_left.piece.kind == 'pawn' and square_left.piece.color != my_color: 
-                attacker_squares.append(square)
+                attacker_squares.append(square_left)
 
         if right_valid:
             row, col = top_right[0], top_right[1]
             square_right = board.board[row][col]
             if square_right.piece.kind == 'pawn' and square_right.piece.color != my_color: 
-                attacker_squares.append(square)
+                attacker_squares.append(square_right)
         
         # pawns are not attacking the square - checking for other pieces now (rooks, bishops, queen and king)
         # check files and diags for unobstructed paths to opponent piece
@@ -187,44 +191,67 @@ class Game:
 
         x, y = board.get_array_idx(desti)
 
-        def is_attacked_by(aggressor, full_path, desti=desti, moving_piece=start.piece):
-            global attacker_square
-            for square in full_path:
-                if square.piece.kind == aggressor and square.piece.color != my_color:
-                    path = self.get_path(moving_piece, desti, square) # odd args because we are checking for desti square not start
-                    if aggressor == 'king':
-                        if len(path) <= 0:
-                            print(f'hit king edge case 1 for {aggressor} - {len(path)}')
-                            attacker_squares.append(square)
-                            return # edge case for the king vs king
-                        return
-                    if len(path) == 0 and desti == square: # edge case allow capturing of pieces with king
-                        return
-                    if not self.path_obstructed(path):
-                        print(f'hit king edge case 2 for {aggressor} - {len(path)}')
-                        attacker_squares.append(square)
-                        return # opponent "piece" can see us
-
-        is_attacked_by('rook', vertical)
-        is_attacked_by('rook', horizontal)
-        is_attacked_by('bishop', diagnonal_ne_sw)
-        is_attacked_by('bishop', diagnonal_nw_se)
+        results = [
+            self.is_attacked_by('rook', vertical, desti, start.piece),
+            self.is_attacked_by('rook', horizontal, desti, start.piece),
+            self.is_attacked_by('bishop', diagnonal_ne_sw, desti, start.piece),
+            self.is_attacked_by('bishop', diagnonal_nw_se, desti, start.piece)
+        ]
 
         all_directions = [vertical, horizontal, diagnonal_nw_se, diagnonal_ne_sw]
         for dir in all_directions:
-            is_attacked_by('queen', dir)
-            is_attacked_by('king', dir)
+            results.append(self.is_attacked_by('queen', dir, desti, start.piece))
+            results.append(self.is_attacked_by('king', dir, desti, start.piece))
         
+        for result in results:
+            if result:
+                attacker_squares.append(result)
+
         return attacker_squares if attacker_squares != [] else None
+
+    def is_attacked_by(self, aggressor, full_path, desti, moving_piece):
+        for square in full_path:
+            if square.piece.kind == aggressor and square.piece.color != self.player_color:
+
+                path = self.get_path(moving_piece, desti, square) # odd args because we are checking for desti square not start
+
+                if aggressor == 'king':
+                    if len(path) <= 0:
+                        print(f'hit king edge case 1 for {aggressor} - {len(path)}')
+                        return square # edge case for the king vs king
+                    return
+
+                if path == [] and desti == square: # edge case allow capturing of pieces with king
+                    return
+
+                if not self.path_obstructed(path):
+                    print(f'hit king edge case 2 for {aggressor} - {len(path)}')
+                    return square # opponent "piece" can see us
 
     def is_pinned(self, start, king):
         '''Take a full diag/file of the start and king args and determine pin state via LoS'''
         # traverse the array from king to your start arg piece and find los of attacker
         pinned = False
-        full_path, path_type = self.get_path(start.piece, king, start, arg_get_full_path=True)
+        full_path = None
+        path_type = ''
 
-        if full_path == None or path_type == None:
-            print(f'* early return full path == None or path_type == None')
+        if start.is_ocupied:
+            #if start.piece.kind == 'knight':
+            #    pass # hadle knight pin here
+            #else:
+            data = self.get_path(start.piece, king, start, arg_get_full_path=True)
+
+            #if data == []:
+            #    print(f'* early return full path == None or path_type == None')
+            #    return False # if your king is not in moving pieces files/diags don't check if it's pinned
+            if isinstance(data, type(None)) or data == []:
+                print(f'* early return full path == None or path_type == None')
+                return False # if your king is not in moving pieces files/diags don't check if it's pinned
+
+            full_path, path_type = data # unpack
+
+        if full_path == None: # bug here yes
+            print(f'* early return 2 full path == None or path_type == None')
             return False # if your king is not in moving pieces files/diags don't check if it's pinned
         
         king_idx = full_path.index(king)
@@ -233,6 +260,10 @@ class Game:
         if king_idx >= start_idx:
             # for consistency and ease of use have king on the left of moving piece array index
             full_path = full_path[::-1]
+            king_idx = full_path.index(king)
+            start_idx = full_path.index(start)
+
+        print(self.show_path(full_path))
 
         for idx, square in enumerate(full_path):
             if idx > king_idx:
@@ -240,20 +271,23 @@ class Game:
                     if idx == start_idx:
                         continue
                     if square.piece.color == self.player_color:
-                        print(f'* los block by friendly')
+                        print(f'* los block by friendly {square.piece.kind} on {square.get_notation()}')
                         break # blocked LoS by friendly
                     else:
                         if square.piece.kind == 'queen':
                             print(f'* pinned by queen')
                             return square
 
-                        if square.piece.kind == 'rook' and path_type == 'file':
+                        elif square.piece.kind == 'rook' and path_type == 'file':
                             print(f'* pinned by rook')
                             return square
 
-                        if square.piece.kind == 'bishop' and path_type == 'diagonal':
+                        elif square.piece.kind == 'bishop' and path_type == 'diagonal':
                             print(f'* pinned by bishop')
                             return square
+
+                        else:
+                            return pinned
 
         return pinned
 
@@ -309,13 +343,10 @@ class Game:
         '''Check piece range against path to destination'''
         return piece.range >= len(path) + 1 # path doesn't include end square
         
-    def get_path(self, moving_piece, start, destination, arg_get_full_path=False) -> list:
+    def get_path(self, moving_piece, start, destination, arg_get_full_path=False) -> list | None:
         '''Returns all squares in between start square and destination square, or the whole diag or file connecting start and dest'''
-        if moving_piece.kind == 'knight':
-            if arg_get_full_path:
-                return None, None
-            else:
-                return []
+        if moving_piece.kind == 'knight' and not arg_get_full_path: # make an excpetion for determinging pins, then knights can have paths
+            return []
 
         path = None
         full_path = None
@@ -328,25 +359,28 @@ class Game:
         diagonal_ne_sw = board.get_diagonal(start, direction='NE-SW')
 
         path_type = ''
-        if moving_piece.kind in ['king', 'queen', 'pawn', 'rook'] or arg_get_full_path:
-            path_type = 'file'
-            if destination in vertical:
-                full_path = vertical
-            elif destination in horizontal:
-                full_path = horizontal
 
-        if moving_piece.kind in ['king', 'queen', 'pawn', 'bishop'] or arg_get_full_path:
+        if destination in vertical:
+            full_path = vertical
+            path_type = 'file'
+        elif destination in horizontal:
+            path_type = 'file'
+            full_path = horizontal
+
+        elif destination in diagonal_nw_se:
+            full_path = diagonal_nw_se
             path_type = 'diagonal'
-            if destination in diagonal_nw_se:
-                full_path = diagonal_nw_se
-            elif destination in diagonal_ne_sw:
-                full_path = diagonal_ne_sw
+        elif destination in diagonal_ne_sw:
+            full_path = diagonal_ne_sw
+            path_type = 'diagonal'
         
-        if full_path == None: # failsafe check
-            return None, None
+        if full_path == []: # failsafe check
+            return []
+        elif full_path == None:
+            return None
 
         if arg_get_full_path:
-            return full_path, path_type
+            return [full_path, path_type]
 
         path_start = full_path.index(start) + 1 # ommit start square: idx+1
         path_end = full_path.index(destination)
@@ -362,6 +396,18 @@ class Game:
 
         path = full_path[path_start : path_end]
         return path
+
+    def show_path(self, path) -> None:
+        s = ''
+        for square in path:
+            s += square.get_notation()
+            s += ':'
+            if square.is_ocupied():
+                s += square.piece.show()
+            else:
+                s += ' '
+            s += ' | '
+        return s
 
     def move(self, piece, start, destination) -> bool:
         '''Move the piece and clear previous square -> log message'''

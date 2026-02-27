@@ -1,9 +1,13 @@
 from flask import Flask, render_template, request, make_response
 from backend import *
 import os
+import logging
 
 
 app = Flask(__name__, template_folder='pages')
+log = logging.getLogger('werkzeug')
+log.disabled = True
+
 codes = []
 game = None
 

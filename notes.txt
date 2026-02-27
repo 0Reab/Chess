@@ -21,3 +21,7 @@ another, is square attacked, fails to return true if the square is moving away f
 
 edge case, if in check allow moving other pieces if they capture the piece
 and get you out of check by doing so
+
+refactored get_path for consistent return type, now [] no path when in reality it's a square next to you, so I will return None if it actually broke mid way
+
+impelemnt get path to comply with knights edgecase for asserting pin state, knights are kinda ignored in get path because they jump over stuff
