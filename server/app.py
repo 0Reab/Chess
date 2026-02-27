@@ -6,7 +6,7 @@ import logging
 
 app = Flask(__name__, template_folder='pages')
 log = logging.getLogger('werkzeug')
-log.disabled = True
+log.disabled = False
 
 codes = []
 game = None

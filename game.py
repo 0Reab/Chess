@@ -1,4 +1,5 @@
 from board import Board
+from pieces import Piece
 
 
 class Game:
@@ -28,7 +29,11 @@ class Game:
             if not self.move_is_legal(moving_piece, target_piece, start_square, desti_square):
                 return False
 
-            return self.move(moving_piece, start_square, desti_square)
+            promotion = False
+            if self.is_pawn_promoted(start_square, desti_square):
+                promotion = True
+
+            return self.move(moving_piece, start_square, desti_square, pawn_promotion=promotion)
 
     def get_board_state(self) -> list:
         '''Data from board for frontend HTML template'''
@@ -155,6 +160,7 @@ class Game:
                 return msg(False, 'same color piece on target square')
             else:
                 return msg(True, description=f'capturing {target_piece.kind} on {desti_square.get_pos()}')
+
 
         return msg(True, description=f'{desti_square.get_pos()}')
 
@@ -315,6 +321,14 @@ class Game:
 
         return row1 == row2 and col1 != col2
 
+    def is_pawn_promoted(self, start, desti) -> bool:
+        '''Determine if destination square is the last row possible'''
+        if self.player_color == 'W':
+            return desti.number == 8
+
+        if self.player_color == 'B':
+            return desti.number == 1
+
     def is_pawn_moving_forward(self, start, desti) -> bool:
         '''Determine move direction based on player color and start-end squares'''
         row_1 = start.number
@@ -426,9 +440,14 @@ class Game:
             s += ' | '
         return s
 
-    def move(self, piece, start, destination) -> bool:
+    def move(self, piece, start, destination, pawn_promotion=False) -> bool:
         '''Move the piece and clear previous square -> log message'''
         # move piece and clear previous square
+        if pawn_promotion:
+            row = destination.piece.row 
+            col = destination.piece.col
+            piece = Piece(col, row, captured=False, promoted=True)
+
         piece.update()
         destination.set_piece(piece)
         start.clear()

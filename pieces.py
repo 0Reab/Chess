@@ -1,11 +1,11 @@
 class Piece:
-    def __init__(self, col, row, captured=False):
+    def __init__(self, col, row, captured=False, promoted=False):
         self.row = row
         self.col = col 
         self.range = 7
         self.exists = True
         self.has_moved = False
-        self.piece_data = self.__square_to_piece(row,col, captured)
+        self.piece_data = self.__square_to_piece(row,col, captured, promoted)
 
         if self.piece_data:
             self.kind, self.color, self.svg = self.piece_data
@@ -27,7 +27,7 @@ class Piece:
         '''Display piece, eg. 'p' for pawn'''
         return self.kind[0]
     
-    def __square_to_piece(self, row, col, captured) -> tuple[str, str]:
+    def __square_to_piece(self, row, col, captured, promoted) -> tuple[str, str]:
         '''Based on square position, initialize appropriate piece for the square'''
         # implement pawn promotion handling when initializing a piece
         if captured:
@@ -44,6 +44,17 @@ class Piece:
             color = "W"
         else:
             color = "B"
+
+        if promoted:
+            if row in [1,2]:
+                color = "B"
+            else:
+                color = "W"
+
+            kind = 'queen'
+            svg = f'{color.lower()}{kind[0].upper()}'
+
+            return [kind, color, svg]
 
         if row in [2,7]:
             kind = 'pawn'
