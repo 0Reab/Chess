@@ -5,53 +5,77 @@ import unittest
 
 
 class Test(unittest.TestCase):
-    # i should deffo make a separate test case to check if every square has inited ok and piece too, each should have the objects
-    '''Test pawns movement, promotion, capturing, two/one square moves'''
+    '''Test suite, methods are meant to be ran in sequence simulating a game with turns'''
     game = Game()
     board = game.board
 
-    def test_piece_init(self, notation) -> tuple[Square, Piece]:
+    def piece_init(self, notation, color) -> tuple[Square, Piece]:
         square = self.board.get_square(notation)
 
-        assert isinstance(square, Square)
-        assert isinstance(square.piece, Piece)
+        self.assertTrue(isinstance(square, Square))
+        self.assertTrue(isinstance(square.piece, Piece))
+        self.assertEqual(square.piece.color, color)
 
-        return square, square.piece
+        return square.piece
 
-    def test_pawn_move(self):
-        '''Does pawn move two, and one squares ok'''
-        game = self.game
-        board = self.board
+    def piece_clear(self, square):
+        '''Check if start square has been cleared after move'''
+        self.assertTrue(isinstance(square, Square))
+        self.assertFalse(square.piece.exists)
 
-        move1 = 'E4'
-        move2 = 'E5'
+    def play_test(self, move, color, illegal=False):
+        '''Main move tester, args, black & white moves'''
+        start, end = move
 
-        mv1 = game.play('E2', move1) # white plays 2 square pawn move
-        assert mv1
-        mv2 = game.play('E7', move2) # black plays it too
-        assert mv2
+        if illegal:
+            self.assertFalse(self.game.play(start, end)) # attempts illegal move
+            return
 
-        print(board)
+        self.assertTrue(self.game.play(start, end)) # plays a move
+        piece = self.piece_init(end, color)
+        self.assertTrue(piece.has_moved)
 
-        square1, pawn_white = self.test_piece_init(move1)
-        square2, pawn_black = self.test_piece_init(move2)
+        self.piece_clear(self.board.get_square(start))
+        print(self.game.board)
 
-        assert pawn_white.color == 'W'
-        assert pawn_black.color == 'B'
+        return piece
 
-        assert pawn_white.range == 1
-        assert pawn_black.range == 1
+    def test_pawn_moves(self):
+        '''Pawns move two squares e4, e5'''
+        white = ['E2', 'E4']
+        black = ['E7', 'E5']
 
-        # check if start squares have been updated properly
-        start1 = board.get_square('E2')
-        start2 = board.get_square('E7')
+        pawn_white = self.play_test(white, 'W')
+        pawn_black = self.play_test(black, 'B')
 
-        assert isinstance(start1, Square)
-        assert isinstance(start2, Square)
+        self.assertEqual(pawn_white.range, 1)
+        self.assertEqual(pawn_black.range, 1)
+    
+    def test_prep_pin(self):
+        '''For later pin test'''
+        white = ['F1', 'B5']
+        black = ['B8', 'C6']
 
-        assert start1.is_ocupied
-        assert start2.is_ocupied
+        self.play_test(white, 'W')
+        self.play_test(black, 'B')
+
+    def test_other(self):
+        ''''''
+        white = ['D2', 'D4']
+        black = ['D7', 'D5']
+
+        self.play_test(white, 'W')
+        self.play_test(black, 'B')
+    
+    def test_test_pin(self):
+        white = ['D1', 'D2']
+        black = ['D8', 'D7']
+        black_illegal = ['C6', 'D4']
+
+        self.play_test(white, 'W')
+        self.play_test(black_illegal, 'B', illegal=True)
+        self.play_test(black, 'B')
 
 
-test = Test()
-test.test_pawn_move()
+if __name__ == '__main__':
+    unittest.main()
