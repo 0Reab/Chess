@@ -18,7 +18,6 @@ class Test(unittest.TestCase):
 
         return square, square.piece
 
-
     def test_pawn_move(self):
         '''Does pawn move two, and one squares ok'''
         game = self.game

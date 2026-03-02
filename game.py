@@ -1,5 +1,6 @@
 from board import Board
 from pieces import Piece
+from squares import Square
 
 
 class Game:
@@ -249,25 +250,19 @@ class Game:
                     print(f'hit king edge case 2 for {aggressor} - {len(path)}')
                     return square # opponent "piece" can see us
 
-    def is_pinned(self, start, king):
-        '''Take a full diag/file of the start and king args and determine pin state via LoS'''
-        # traverse the array from king to your start arg piece and find los of attacker
-        pinned = False
-        full_path = None
-        path_type = ''
-
-        ''' refactor note - START -> refac into different method - validation or smth '''
+    def __get_data_for_pin(self, start, king) -> list | bool:
+        '''Helper - Returns full file or diagonal of your start square and king square, and returns board indices of king and start args: if fail -> False'''
         if start.is_ocupied:
             data = self.get_path(start.piece, king, start, arg_get_full_path=True)
 
             if isinstance(data, type(None)) or data == []:
-                print(f'* early return full path == None or path_type == None')
+                print(f'* early return 1')
                 return False # if your king is not in moving pieces files/diags don't check if it's pinned
 
             full_path, path_type = data # unpack
 
         if full_path == None: # bug here yes
-            print(f'* early return 2 full path == None or path_type == None')
+            print(f'* early return 2')
             return False # if your king is not in moving pieces files/diags don't check if it's pinned
         
         king_idx = full_path.index(king)
@@ -279,32 +274,42 @@ class Game:
             king_idx = full_path.index(king)
             start_idx = full_path.index(start)
 
-        ''' refactor note - END'''
+        return [full_path, path_type, king_idx, start_idx]
 
-        for idx, square in enumerate(full_path):
-            if idx > king_idx:
-                if square.is_ocupied():
-                    if idx == start_idx:
-                        continue
-                    if square.piece.color == self.player_color:
-                        print(f'* los block by friendly {square.piece.kind} on {square.get_notation()}')
-                        break # blocked LoS by friendly no further test needed for pin
-                    else:
-                        if square.piece.kind == 'queen':
-                            print(f'* pinned by queen')
-                            return square
+    def is_pinned(self, start, king) -> Square | bool:
+        '''Take a full diag/file of the start (your moving piece square) and king (square) and determine piece pin state via LoS check -> Square of pin instigator or False if not pinned'''
+        # traverse the array from king to your start arg piece and find los of attacker
+        pinned = False
+        full_path = None
+        path_type = ''
 
-                        elif square.piece.kind == 'rook' and path_type == 'file':
-                            print(f'* pinned by rook')
-                            return square
+        data = self.__get_data_for_pin(start, king)
+        if data:
+            full_path, path_type, king_idx, start_idx = data # unpack
 
-                        elif square.piece.kind == 'bishop' and path_type == 'diagonal':
-                            print(f'* pinned by bishop')
-                            return square
-
+            for idx, square in enumerate(full_path):
+                if idx > king_idx:
+                    if square.is_ocupied():
+                        if idx == start_idx:
+                            continue
+                        if square.piece.color == self.player_color:
+                            print(f'* los block by friendly {square.piece.kind} on {square.get_notation()}')
+                            break # blocked LoS by friendly no further test needed for pin
                         else:
-                            return pinned
+                            if square.piece.kind == 'queen':
+                                print(f'* pinned by queen')
+                                return square
 
+                            elif square.piece.kind == 'rook' and path_type == 'file':
+                                print(f'* pinned by rook')
+                                return square
+
+                            elif square.piece.kind == 'bishop' and path_type == 'diagonal':
+                                print(f'* pinned by bishop')
+                                return square
+
+                            else:
+                                return pinned
         return pinned
 
     def is_king_moving_horizontally(self, start, desti) -> bool:
@@ -442,7 +447,7 @@ class Game:
             piece = Piece(col, row, captured=False, promoted=True)
 
         piece.update()
-        destination.set_piece(piece)
+        destination.piece = piece
         start.clear()
 
         if self.player_color == 'W':

@@ -18,11 +18,6 @@ class Square:
     def get_notation(self) -> str:
         '''Get square display notation eg. -> "E4"'''
         return ''.join([self.letter, str(self.number)])
-
-    def set_piece(self, piece) -> None:
-        '''Update square with new piece'''
-        # mby do some checks here idek
-        self.piece = piece
     
     def clear(self) -> None:
         '''Clear square by instanciating new empty piece object'''

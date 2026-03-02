@@ -114,18 +114,10 @@ class Board:
 
     def get_square(self, position) -> Square:
         '''From notation (eg. E4) return square object from the board'''
-        # could refactor later and use self.letters_to_idx
-        # row is number, col is letter E4
-        col, row = position
-        row = int(row) - 1 # for 0 indexed array
-        col_idx = 0
+        col, row = position 
+        row = int(row) - 1
 
-        for idx, letter in enumerate(self.letters):
-            if col == letter:
-                col_idx = idx
-                break
-
-        square = self.board[row][col_idx]
+        square = self.board[row][self.letters_to_idx[col]]
         return square
 
     def get_knight_moves(self, square) -> list[Square]:
