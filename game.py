@@ -253,7 +253,7 @@ class Game:
     def __get_data_for_pin(self, start, king) -> list | bool:
         '''Helper - Returns full file or diagonal of your start square and king square, and returns board indices of king and start args: if fail -> False'''
         if start.is_ocupied:
-            data = self.get_path(start.piece, king, start, arg_get_full_path=True)
+            data = self.get_path(start.piece, king, start, ignore_type=True)
 
             if isinstance(data, type(None)) or data == []:
                 print(f'* early return 1')
@@ -372,9 +372,9 @@ class Game:
         '''Check piece range against path to destination'''
         return piece.range >= len(path) + 1 # path doesn't include end square
         
-    def get_path(self, moving_piece, start, destination, arg_get_full_path=False) -> list | None:
+    def get_path(self, moving_piece, start, destination, ignore_type=False) -> list | None:
         '''Returns all squares in between start square and destination square, or the whole diag or file connecting start and dest'''
-        if moving_piece.kind == 'knight' and not arg_get_full_path: # make an excpetion for determinging pins, then knights can have paths
+        if moving_piece.kind == 'knight' and not ignore_type: # make an excpetion for determinging pins, then knights can have paths to king
             return []
 
         path = None
@@ -387,28 +387,30 @@ class Game:
         diagonal_nw_se = board.get_diagonal(start, direction='NW-SE')
         diagonal_ne_sw = board.get_diagonal(start, direction='NE-SW')
 
-        path_type = ''
+        is_not_bishop = moving_piece.kind != 'bishop' or ignore_type # discriminate by piece type unless arg specifies to ignore piece type
+        is_not_rook = moving_piece.kind != 'rook' or ignore_type 
+        path_type, diag, file = '', 'diagonal', 'file'
 
-        if destination in vertical:
-            full_path = vertical
-            path_type = 'file'
-        elif destination in horizontal:
-            path_type = 'file'
-            full_path = horizontal
 
-        elif destination in diagonal_nw_se:
-            full_path = diagonal_nw_se
-            path_type = 'diagonal'
-        elif destination in diagonal_ne_sw:
-            full_path = diagonal_ne_sw
-            path_type = 'diagonal'
+        # ... and false == false (by defualt), in other scenario it will be... and false == true
+        if destination in vertical and is_not_bishop:
+            full_path, path_type = vertical, file
+
+        elif destination in horizontal and is_not_bishop:
+            full_path, path_type = horizontal, file
+
+        elif destination in diagonal_nw_se and is_not_rook:
+            full_path, path_type = diagonal_nw_se, diag
+
+        elif destination in diagonal_ne_sw and is_not_rook:
+            full_path, path_type = diagonal_ne_sw, diag
         
         if full_path == []: # failsafe check
             return []
         elif full_path == None:
             return None
 
-        if arg_get_full_path:
+        if ignore_type:
             return [full_path, path_type]
 
         path_start = full_path.index(start) + 1 # ommit start square: idx+1
