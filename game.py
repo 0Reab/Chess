@@ -462,12 +462,3 @@ class Game:
     def is_same_color(self, piece_1, piece_2) -> bool:
         '''Are two pieces same color'''
         return piece_1.color == piece_2.color
-
-    def prompt_player(self) -> tuple[str, int]:
-        '''Prompt player to select a square eg. "E2" -> and return it'''
-        selected = input(f'player {self.player_color} select square: ') # eg. 'E2'
-
-        col = selected[0]
-        row = int(selected[1])
-
-        return [col, row]
