@@ -3,6 +3,7 @@ from pieces import Piece
 
 
 class Game:
+    '''Responsible for managing game states, move legality, player turns and logging'''
     def __init__(self):
         self.board = Board()
         self.running = True
@@ -18,9 +19,6 @@ class Game:
             # get players move attempt
             start_square = board.get_square(start)
             desti_square = board.get_square(desti)
-
-            # legal and illegal moves of a given piece in this square
-            all_piece_moves = board.get_moves(start_square)
 
             # get pieces from start and destination squares
             moving_piece = start_square.piece
@@ -159,10 +157,10 @@ class Game:
             if self.is_same_color(moving_piece, target_piece):
                 return msg(False, 'same color piece on target square')
             else:
-                return msg(True, description=f'capturing {target_piece.kind} on {desti_square.get_pos()}')
+                return msg(True, description=f'capturing {target_piece.kind} on {desti_square.get_notation()}')
 
 
-        return msg(True, description=f'{desti_square.get_pos()}')
+        return msg(True, description=f'{start_square.get_notation()} -> {desti_square.get_notation()}')
 
     def get_square_attackers(self, start, desti) -> list | None: # exclude king in the path for checking attaced squares, so you cant move the king backwards into attacked square
         '''Check if square is attacked by opponents piece (for king mainly) -> returns list Square obj of attackers or None'''
@@ -258,15 +256,10 @@ class Game:
         full_path = None
         path_type = ''
 
+        ''' refactor note - START -> refac into different method - validation or smth '''
         if start.is_ocupied:
-            #if start.piece.kind == 'knight':
-            #    pass # hadle knight pin here
-            #else:
             data = self.get_path(start.piece, king, start, arg_get_full_path=True)
 
-            #if data == []:
-            #    print(f'* early return full path == None or path_type == None')
-            #    return False # if your king is not in moving pieces files/diags don't check if it's pinned
             if isinstance(data, type(None)) or data == []:
                 print(f'* early return full path == None or path_type == None')
                 return False # if your king is not in moving pieces files/diags don't check if it's pinned
@@ -286,7 +279,7 @@ class Game:
             king_idx = full_path.index(king)
             start_idx = full_path.index(start)
 
-        print(self.show_path(full_path))
+        ''' refactor note - END'''
 
         for idx, square in enumerate(full_path):
             if idx > king_idx:
@@ -295,7 +288,7 @@ class Game:
                         continue
                     if square.piece.color == self.player_color:
                         print(f'* los block by friendly {square.piece.kind} on {square.get_notation()}')
-                        break # blocked LoS by friendly
+                        break # blocked LoS by friendly no further test needed for pin
                     else:
                         if square.piece.kind == 'queen':
                             print(f'* pinned by queen')
@@ -471,7 +464,3 @@ class Game:
         row = int(selected[1])
 
         return [col, row]
-
-
-#game = Game()
-#game.play()
