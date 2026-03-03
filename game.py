@@ -114,7 +114,7 @@ class Game:
             pin_instigator = self.is_pinned(start_square, king)
 
             if pin_instigator and pin_instigator != desti_square: # allows for capturing of pin instigator
-                return msg(False, 'This piece is pinned to the king')
+                return msg(False, f'{moving_piece.kind} is pinned to the king by {pin_instigator.piece.kind} on {pin_instigator.get_notation()}')
 
         if moving_piece.kind == 'pawn':
             if not self.is_pawn_moving_forward(start_square, desti_square):

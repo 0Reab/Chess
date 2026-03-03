@@ -10,11 +10,17 @@ class Board:
 
     def __repr__(self):
         result = ''
+        green, red, nocolor = '\033[92m', '\033[91m', '\033[0m'
 
         for row in self.board[::-1]: # invert board for white perspective only for visualizing
             for square in row:
                 if square.is_ocupied():
-                    result += f'[{square.piece.show()}]'
+                    piece = ''
+                    if square.piece.color == 'W':
+                        piece = green + square.piece.show() + nocolor
+                    else:
+                        piece = red + square.piece.show() + nocolor
+                    result += f'[{piece}]'
                 else:
                     result += '[ ]'
             

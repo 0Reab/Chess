@@ -31,7 +31,10 @@ class Test(unittest.TestCase):
             self.assertFalse(self.game.play(start, end)) # attempts illegal move
             return
 
-        self.assertTrue(self.game.play(start, end)) # plays a move
+        move_result = self.game.play(start, end)
+        print(f'move result -> {move_result}')
+        self.assertTrue(move_result) # plays a move
+
         piece = self.piece_init(end, color)
         self.assertTrue(piece.has_moved)
 
@@ -74,6 +77,40 @@ class Test(unittest.TestCase):
 
         self.play_test(white, 'W')
         self.play_test(black_illegal, 'B', illegal=True)
+        self.play_test(black, 'B')
+
+    def test_many_illegal_moves(self):
+        white_illegal_moves = [
+            ['D4', 'D5'],
+            ['E4', 'E6'],
+            ['E4', 'F4'],
+            ['E4', 'F5'],
+            ['E4', 'E3'],
+            ['E4', 'E2'],
+            ['C1', 'E3'],
+        ]
+        black_illegal_moves = [
+            ['D5', 'D4'],
+            ['E5', 'E4'],
+            ['E5', 'D5'],
+            ['E5', 'C5'],
+            ['E5', 'C4'],
+            ['E5', 'E7'],
+            ['C8', 'A6'],
+        ]
+
+        white = ['D4', 'E5']
+        black = ['E5', 'D4']
+
+        for move in white_illegal_moves:
+            self.play_test(move, 'W', illegal=True)
+
+        # play legal white move here before black move
+        self.play_test(white, 'W')
+
+        for move in black_illegal_moves:
+            self.play_test(move, 'B', illegal=True)
+
         self.play_test(black, 'B')
 
 
