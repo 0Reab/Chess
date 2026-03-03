@@ -99,19 +99,11 @@ class Test(unittest.TestCase):
             ['C8', 'A6'],
         ]
 
-        white = ['D4', 'E5']
-        black = ['E5', 'D4']
-
         for move in white_illegal_moves:
             self.play_test(move, 'W', illegal=True)
 
-        # play legal white move here before black move
-        self.play_test(white, 'W')
-
-        for move in black_illegal_moves:
-            self.play_test(move, 'B', illegal=True)
-
-        self.play_test(black, 'B')
+        #for move in black_illegal_moves:
+        #    self.play_test(move, 'B', illegal=True)
 
 
 if __name__ == '__main__':

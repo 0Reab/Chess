@@ -160,23 +160,49 @@ class Board:
             raise ValueError("King not on the board lol")
         return king
     
-    def get_rooks_for_castling(self, color) -> list:
-        '''Returns a list of rooks that haven't moved yet of your player color - still have castling rights'''
-        result = []
-        if color == 'W': # first row corner squares
-            rook1 = self.board[0][0]
-            rook2 = self.board[0][-1]
+    def get_rook_for_castling(self, color, king_desti) -> Square | None:
+        '''Returns a rook square that hasn't moved yet of your player color -> still has castling rights'''
+        if color == 'W': # first row
+            row = 1
+        elif color == 'B': # last row
+            row = 8
 
-        if color == 'B': # last row corner squares
-            rook1 = self.board[-1][0]
-            rook2 = self.board[-1][-1]
-        
-        if rook1.is_ocupied():
-            if not rook1.piece.has_moved():
-                result.append(rook1)
+        if king_desti == self.get_square(f'C{row}'):
+            square = self.get_square(f'A{row}')
 
-        if rook2.is_ocupied():
-            if not rook2.piece.has_moved():
-                result.append(rook2)
+        elif king_desti == self.get_square(f'G{row}'):
+            square = self.get_square(f'H{row}')
+
+        if square.is_ocupied():
+            if not square.piece.has_moved:
+                return square
+    
+    def get_king_castle_squares(self, color) -> list:
+        '''Based on player color fetch king destination squares after hypotetical castling, long and short castle'''
+        if color == 'W':
+            row = 1
+        elif color == 'B':
+            row = 8
+
+        sqr2 = self.get_square(f'C{row}') # long castle
+        sqr1 = self.get_square(f'G{row}') # short castle
         
-        return result
+        return [sqr1, sqr2]
+    
+    def get_rook_castling_destination(self, rook: Square) -> Square | None:
+        '''Simple hardcoded mapping for each rook, where would it end up when castled'''
+        notation = rook.get_notation()
+        castled = ''
+
+        match notation:
+            # white player 
+            case 'A1': castled = 'D1' # short
+            case 'H1': castled = 'F1' # long
+            # black blac
+            case 'A8': castled = 'D8' # short
+            case 'H8': castled = 'F8' # long
+
+        if not castled:
+            return None
+
+        return self.get_square(castled)

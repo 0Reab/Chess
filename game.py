@@ -11,11 +11,13 @@ class Game:
         self.players = ['W', 'B'] # aka ['white', 'black']
         self.player_color = self.players[0]
         self.message = lambda error, description: self.msg(error, description)
+        self.castling = False
 
     def play(self, start, desti) -> bool:
         '''Main game loop, passing turns'''
         if self.running:
             board = self.board
+            castling = self.castling 
 
             # get players move attempt
             start_square = board.get_square(start)
@@ -31,6 +33,12 @@ class Game:
             promotion = False
             if self.is_pawn_promoted(start_square, desti_square):
                 promotion = True
+            
+            print(f'self.castling -> {self.castling}')
+            if self.castling:
+                print('call castle_rook method')
+                rook_square, rook_desti = self.castling
+                self.castle_rook(rook_square, rook_desti)
 
             return self.move(moving_piece, start_square, desti_square, pawn_promotion=promotion)
 
@@ -134,23 +142,6 @@ class Game:
         if not self.is_move_in_range(moving_piece, path):
             return msg(False, 'exceeded piece range')
 
-        # make this into a method ye
-        #  move the rook by simply placing it behind the king and make sure to set has moved flag to true
-
-        if moving_piece.kind == 'king' and not moving_piece.has_moved:
-            if len(path) == 2 and moving_piece.row == desti_square.piece.row: # castling attempt
-                rooks_for_castling = self.board.get_rooks_for_castling(self.player_color)
-
-                if len(rooks_for_castling) == 0:
-                    return msg(False, 'no rooks available to castle with')
-                
-                if desti_square not in rooks_for_castling:
-                    if desti_square in path:
-                        self.castle()
-                    return msg(False, 'desti not in path')
-                return msg(False, 'cannot castle the king onto the rook square')
-            return msg(False, 'where is bro castling')
-
         if self.path_obstructed(path):
             return msg(False, 'you cant move thru pieces')
 
@@ -159,7 +150,25 @@ class Game:
                 return msg(False, 'same color piece on target square')
             else:
                 return msg(True, description=f'capturing {target_piece.kind} on {desti_square.get_notation()}')
+        
+        if moving_piece.kind == 'king' and not moving_piece.has_moved:
+            if len(path) == 1: # (2) because destination is not counted
+                castle_squares = self.board.get_king_castle_squares(self.player_color)
+                rook = self.board.get_rook_for_castling(self.player_color, desti_square)
 
+                if not rook:
+                    return msg(False, 'no rook available to castle with')
+
+                if desti_square in castle_squares:
+                    for square in path:
+                        if self.get_square_attackers(start_square, square):
+                            return msg(False, 'cannot castle thru check or into a check')
+                else:
+                    return msg(False, 'invalid castling destination')
+
+                print('upadte self.castling')
+                rook_castling_desti = self.board.get_rook_castling_destination(rook) 
+                self.castling = [rook, rook_castling_desti]
 
         return msg(True, description=f'{start_square.get_notation()} -> {desti_square.get_notation()}')
 
@@ -462,3 +471,11 @@ class Game:
     def is_same_color(self, piece_1, piece_2) -> bool:
         '''Are two pieces same color'''
         return piece_1.color == piece_2.color
+
+    def castle_rook(self, rook_square, desti):
+        rook = rook_square.piece
+        rook.update()
+        desti.piece = rook
+        rook_square.clear()
+        self.castling = False
+        print('castled')
