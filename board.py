@@ -167,15 +167,20 @@ class Board:
         elif color == 'B': # last row
             row = 8
 
+        square = None
+
         if king_desti == self.get_square(f'C{row}'):
             square = self.get_square(f'A{row}')
+            long_castle_clear = not self.get_square(f'B{row}').is_ocupied()
 
         elif king_desti == self.get_square(f'G{row}'):
             square = self.get_square(f'H{row}')
+            long_castle_clear = True # does not apply to short castle
 
-        if square.is_ocupied():
-            if not square.piece.has_moved:
-                return square
+        if square:
+            if square.is_ocupied():
+                if not square.piece.has_moved and long_castle_clear:
+                    return square
     
     def get_king_castle_squares(self, color) -> list:
         '''Based on player color fetch king destination squares after hypotetical castling, long and short castle'''

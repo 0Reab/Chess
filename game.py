@@ -152,7 +152,12 @@ class Game:
                 return msg(True, description=f'capturing {target_piece.kind} on {desti_square.get_notation()}')
         
         if moving_piece.kind == 'king' and not moving_piece.has_moved:
+            attackers = self.get_square_attackers(start_square, start_square)
+
             if len(path) == 1: # (2) because destination is not counted
+                if attackers != None:
+                    return msg(False, 'cant castle while in check')
+
                 castle_squares = self.board.get_king_castle_squares(self.player_color)
                 rook = self.board.get_rook_for_castling(self.player_color, desti_square)
 

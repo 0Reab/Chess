@@ -1,12 +1,9 @@
 ###
 what is left for chess:
 
+moving out of check into a square still in in check away from check instigator
 en passant
 choose piece to promote pawns to
 checkmate state? need to think about it
-
-castling edge case, illegal move detecotr lacks check to see if castling path is clear of friednly pieces 
-- like knight on long castle, short castle seems ok, cant castle thru checks - good
-- dissalow castling while king in check
 
 later: after chess game is complete, turn the debug webapp into a proper prod app (sort of)
