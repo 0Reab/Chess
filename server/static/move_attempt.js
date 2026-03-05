@@ -2,7 +2,7 @@ let startSquare = null;
 const socket = io();
 
 socket.on('board_update', (data) => {
-    document.querySelector('.board').innerHTML = data.html;
+    document.querySelector('.game').innerHTML = data.html;
 })
 
 function handleClick(element) {
