@@ -245,7 +245,8 @@ class Game:
 
         return attacker_squares if attacker_squares != [] else None
 
-    def is_attacked_by(self, aggressor, full_path, desti, moving_piece) -> object | None:
+    def is_attacked_by(self, aggressor, full_path: list, desti, moving_piece) -> object | None:
+        '''Helper method for get_square_attackers, parses path of squares'''
         for square in full_path:
             if square.piece.kind == aggressor and square.piece.color != self.player_color:
 
@@ -263,6 +264,7 @@ class Game:
                 if not self.path_obstructed(path):
                     print(f'hit king edge case 2 for {aggressor} - {len(path)}')
                     return square # opponent "piece" can see us
+                print('big chilling')
 
     def __get_data_for_pin(self, start, king) -> list | bool:
         '''Helper - Returns full file or diagonal of your start square and king square, and returns board indices of king and start args: if fail -> False'''

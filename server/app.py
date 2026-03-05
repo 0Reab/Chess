@@ -1,10 +1,12 @@
 from flask import Flask, render_template, request, make_response
+from flask_socketio import SocketIO, emit, join_room
 from backend import *
 import os
 import logging
 
 
 app = Flask(__name__, template_folder='pages')
+socketio = SocketIO(app)
 log = logging.getLogger('werkzeug')
 log.disabled = False
 
@@ -19,6 +21,28 @@ def read_key():
     return key
 
 
+@socketio.on('join_game')
+def handle_player_join(data):
+    code = data['join_code']
+
+    print(f'player join -> {code}')
+
+
+@socketio.on('player_move')
+def handle_player_move(data):
+    global game
+    start = data['move_start']
+    desti = data['move_desti']
+
+    game.play(start, desti)
+    print(f'player move -> {start} -> {desti}')
+
+    board = game.get_board_state()
+    print(game.board)
+
+    emit('board_update', {'html': render_template('game.html', board=board)})
+
+
 '''@app.route('/', methods=['GET'])
 def home():
     if request.method == 'GET':
@@ -26,7 +50,7 @@ def home():
         resp = make_response(render_template('home.html', nickname=nickname))
         return resp'''
 
- 
+
 @app.route('/', methods=['GET'])
 def home():
     global game 
@@ -45,6 +69,7 @@ def home():
     print(game.board)
 
     return render_template('game.html', nickname=nickname, board=board, opponent=opponent)
+
 
 @app.route('/set-nickname', methods=['POST'])
 def set_nickname():
@@ -82,13 +107,10 @@ def join_game():
         else:
             err_msg = 'Code does not exist.'
 
-        game = start_game() 
-        board = game.get_board_state()
-
         if err_msg:
             resp = render_template('home.html', nickname=nickname, msg=err_msg)
         else:
-            resp = render_template('game.html', nickname=nickname, board=board) # add opponent nick too
+            resp = render_template('game.html', nickname=nickname) # add opponent nick too
 
         return resp
 
@@ -109,3 +131,4 @@ if __name__ == '__main__':
     app.secret_key = read_key()
     port = int(os.environ.get('PORT', 1337))
     app.run(host='0.0.0.0', port=port)
+    socketio.run(app)

@@ -25,5 +25,10 @@ Game page
     </div>
 </div>
 
+<script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
 <script src="/static/move_attempt.js"></script>
+<script>
+    const CODE = 111111; //{{ code }};
+    socket.emit('join_game', { join_code: CODE });
+</script>
 {% endblock %}

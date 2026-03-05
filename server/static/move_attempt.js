@@ -1,19 +1,24 @@
 let startSquare = null;
+const socket = io();
+
+socket.on('board_update', (data) => {
+    document.querySelector('.board').innerHTML = data.html;
+})
 
 function handleClick(element) {
     const square = element.id;
 
     if (!startSquare) {
         startSquare = square;
-        console.log("clicked on start " + square);
         return;
     }
 
     const endSquare = square;
-    console.log("clicked on end " + square);
 
-    window.location.href =
-        `/?move_start=${startSquare}&move_desti=${endSquare}`;
+    socket.emit('player_move', { 'move_start': startSquare, 'move_desti': endSquare})
+
+    //window.location.href =
+    //    `/?move_start=${startSquare}&move_desti=${endSquare}`;
 
     startSquare = null;
 }
