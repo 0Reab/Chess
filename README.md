@@ -16,7 +16,7 @@ Chess/
 └── server/      # local web server + HTML/CSS/JS frontend
 ```
 
-## Running it
+## Usage
 
 ```bash
 git clone https://github.com/0Reab/Chess.git
@@ -45,3 +45,7 @@ Then open `http://localhost:<port>` in your browser.
 - Game over screen
 - Matchmaking via code
 - Security auditing :)
+
+## Thank you
+
+To Lichess and Randall Munroe (xkcd) for the Chess pieces graphics set!
