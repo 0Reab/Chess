@@ -1,6 +1,6 @@
 # Chess
 
-Chess built from scratch in Python, OOP style. Has a web backedn & frontend served locally.
+Chess built from scratch in Python, OOP style. Has a web backend & frontend served locally.
 
 ![screenshot](https://i.imgur.com/gmPGgNa.png)
 
