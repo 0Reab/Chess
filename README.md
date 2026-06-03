@@ -19,7 +19,9 @@ Chess/
 ```bash
 git clone https://github.com/0Reab/Chess.git
 cd Chess
-python server/server.py
+activate venv
+cd server
+python -m app
 ```
 
 Then open `http://localhost:<port>` in your browser.
