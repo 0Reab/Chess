@@ -2,7 +2,7 @@
 
 Chess built from scratch in Python, OOP style. Has a web backedn & frontend served locally.
 
-![screenshot]([https://imgur.com/a/ug8wxM](https://i.imgur.com/gmPGgNa.png)](https://i.imgur.com/gmPGgNa.png)
+![screenshot](https://i.imgur.com/gmPGgNa.png)
 
 ## Structure
 
