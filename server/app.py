@@ -1,7 +1,9 @@
+import sys, os
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
 from flask import Flask, render_template, request, make_response
 from flask_socketio import SocketIO, emit, join_room
 from backend import *
-import os
 import logging
 
 
